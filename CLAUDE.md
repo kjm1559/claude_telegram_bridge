@@ -39,16 +39,23 @@ The Planer agent is responsible for analyzing requirements and creating detailed
 - Review existing codebase structure and patterns
 - Document the planned approach for implementation
 
-## Step 2: Executer Agent
-The Executer agent implements the plans created by the Planer agent.
+## Step 2: Architect & Executer Collaboration
+The Architect and Executer agents work together to implement the system design and execute the implementation plan.
 
 ### Responsibilities:
-- Execute the implementation plan
-- Write or modify code files
-- Run tests and validate functionality
-- Ensure code quality and adherence to project standards
-- Document implementation details
-- Handle any issues that arise during execution
+- **Architect Agent**:
+  - Review and validate implementation approaches
+  - Ensure code aligns with overall system architecture
+  - Provide guidance on architectural patterns and best practices
+  - Coordinate implementation with system design
+
+- **Executer Agent**:
+  - Execute the implementation plan
+  - Write or modify code files
+  - Run tests and validate functionality
+  - Ensure code quality and adherence to project standards
+  - Document implementation details
+  - Handle any issues that arise during execution
 
 ## Step 3: Cheaker Agent
 The Cheaker agent validates the work produced by the Executer agent.
@@ -62,12 +69,12 @@ The Cheaker agent validates the work produced by the Executer agent.
 - Confirm that the implementation is complete and working
 
 ## Main Handler Process
-The main handler coordinates between these three agents to reach the project's goals:
+The main handler coordinates between these agents to reach the project's goals:
 
 1. **Architecture Phase**: The Architect agent designs the overall system structure and high-level strategies
 2. **Requirement Analysis**: The Planer agent analyzes the task requirements
 3. **Planning Phase**: The Planer agent creates a detailed plan
-4. **Execution Phase**: The Executer agent implements the plan
+4. **Architecture & Execution Collaboration**: The Architect and Executer agents collaborate to implement the system design
 5. **Validation Phase**: The Cheaker agent reviews and validates the implementation
 6. **Feedback Loop**: Any issues identified are addressed through further planning and execution cycles
 
@@ -85,9 +92,10 @@ The main handler coordinates between these three agents to reach the project's g
 - Documentation should be maintained throughout all phases
 
 ## Agent Workflow
-The three agents work in a coordinated sequence:
-1. **Planer Agent** - Analyzes requirements and creates implementation plans
-2. **Executer Agent** - Implements the plans created by the Planer agent
-3. **Cheaker Agent** - Validates the work produced by the Executer agent
+The agents work in a coordinated sequence:
+1. **Architect Agent** - Designs overall system structure and high-level strategies
+2. **Planer Agent** - Analyzes requirements and creates implementation plans
+3. **Architect & Executer Agents** - Collaborate to implement the system design and execute the plan
+4. **Cheaker Agent** - Validates the work produced by the Executer agent
 
 The feedback loop ensures continuous improvement and quality assurance throughout the development process.

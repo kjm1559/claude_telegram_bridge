@@ -100,20 +100,6 @@ The agents work in a coordinated sequence:
 
 The feedback loop ensures continuous improvement and quality assurance throughout the development process.
 
-## Command Structure
-The system supports Telegram commands using the format `/command_name`:
-- `/new_session` - Creates a new Claude session with UUID, tmux session, and database update
-- `/sessions` - Lists all currently active Claude sessions
-- `/end_session {uuid}` - Terminates a specific Claude session by UUID and updates database
-- `/current_session` - Displays currently selected Claude session information
-
-## Chat Input Handling
-When users send chat messages (non-command inputs):
-- If a session is selected: Routes input to the tmux session using `tmux send-keys`
-- If no session is selected: Prompts user to select a session
-- Monitors project directory for new Claude responses in JSONL files
-- Sends new messages to Telegram when detected
-
 ## Git Workflow and Documentation
 All changes are committed to the git repository with descriptive commit messages that summarize the work done. This creates a detailed history that serves as long-term memory for the project.
 
@@ -136,14 +122,7 @@ git log --oneline
 git show <commit-hash>
 ```
 
-### Automatic Updates
-When modifications are needed:
-1. Review relevant MD files to understand current implementation
-2. Make necessary changes to code or documentation
-3. Commit changes with descriptive messages
-4. The updated documentation becomes part of the long-term memory
-
-This approach ensures that documentation stays current with implementation changes and provides a complete reference for future development, troubleshooting, or knowledge sharing.
+This approach ensures that all work is properly documented and can be referenced for future development, troubleshooting, or knowledge sharing.
 
 ## Command Structure
 The system supports Telegram commands using the format `/command_name`:

@@ -37,6 +37,20 @@ To use this bridge:
 - Claude CLI
 - sqlite3
 
+## Command Structure
+The system supports Telegram commands using the format `/command_name`:
+- `/new_session` - Creates a new Claude session with UUID, tmux session, and database update
+- `/sessions` - Lists all currently active Claude sessions
+- `/end_session {uuid}` - Terminates a specific Claude session by UUID and updates database
+- `/current_session` - Displays currently selected Claude session information
+
+## Chat Input Handling
+When users send chat messages (non-command inputs):
+- If a session is selected: Routes input to the tmux session using `tmux send-keys`
+- If no session is selected: Prompts user to select a session
+- Monitors project directory for new Claude responses in JSONL files
+- Sends new messages to Telegram when detected
+
 ## Documentation
 
 Comprehensive documentation is available in the `/doc` directory:

@@ -11,6 +11,16 @@ This directory contains documentation for all Telegram commands available in the
 - Executes Claude with the session ID
 - Updates SQLite database with session information
 
+### /sessions
+- Lists all currently active Claude sessions
+- Shows session status information
+- Indicates which sessions are active
+
+### /end_session {uuid}
+- Terminates a specific Claude session by UUID
+- Closes the tmux session
+- Updates SQLite database to mark session as inactive
+
 ## Command Structure
 All commands follow the Telegram bot command format:
 ```

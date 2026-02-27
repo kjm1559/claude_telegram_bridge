@@ -17,15 +17,16 @@ Agent definitions are stored in the `/agents` directory of this project. This di
 
 ### Available Agents
 
-1. **Planer** - Responsible for analyzing requirements and creating detailed implementation plans
-2. **Executer** - Implements the plans created by the Planer agent
-3. **Cheaker** - Validates the work produced by the Executer agent
+1. **Architect** - Responsible for designing the overall system structure and high-level implementation strategies
+2. **Planer** - Responsible for analyzing requirements and creating detailed implementation plans
+3. **Executer** - Implements the plans created by the Planer agent
+4. **Cheaker** - Validates the work produced by the Executer agent
 
 Each agent has a corresponding JSON file in the agents directory that defines:
 - Agent name and description
 - Core responsibilities
 - Specializations
-- Tools used
+- tools used
 
 ## Step 1: Planer Agent
 The Planer agent is responsible for analyzing requirements and creating detailed implementation plans.
@@ -63,13 +64,15 @@ The Cheaker agent validates the work produced by the Executer agent.
 ## Main Handler Process
 The main handler coordinates between these three agents to reach the project's goals:
 
-1. **Requirement Analysis**: The Planer agent analyzes the task requirements
-2. **Planning Phase**: The Planer agent creates a detailed plan
-3. **Execution Phase**: The Executer agent implements the plan
-4. **Validation Phase**: The Cheaker agent reviews and validates the implementation
-5. **Feedback Loop**: Any issues identified are addressed through further planning and execution cycles
+1. **Architecture Phase**: The Architect agent designs the overall system structure and high-level strategies
+2. **Requirement Analysis**: The Planer agent analyzes the task requirements
+3. **Planning Phase**: The Planer agent creates a detailed plan
+4. **Execution Phase**: The Executer agent implements the plan
+5. **Validation Phase**: The Cheaker agent reviews and validates the implementation
+6. **Feedback Loop**: Any issues identified are addressed through further planning and execution cycles
 
 ## Agent Coordination
+- The Architect agent must complete the system design before the Planer agent begins detailed planning
 - The Planer agent must complete its analysis before the Executer agent begins work
 - The Executer agent must complete implementation before the Cheaker agent validates
 - The Cheaker agent's feedback should be incorporated back into the Planer agent for potential revisions

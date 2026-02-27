@@ -114,3 +114,48 @@ class CommandHandler:
 - Database connection/insertion failures
 - Session termination failures
 - Invalid UUID format
+- tmux session not found
+- JSONL file monitoring failures
+
+## Chat Input Handling
+
+1. **Message Detection**
+   - Detect non-command input (text that doesn't start with "/")
+   - Determine if user has selected a session
+
+2. **Session Routing**
+   - If session selected: Route input to tmux session using `tmux send-keys`
+   - If no session selected: Return prompt to select session
+
+3. **Project Directory Resolution**
+   - Resolve project directory based on cwd
+   - Create project folder structure: `/home/user/path/-home-user-path`
+
+4. **Session Data Tracking**
+   - Monitor JSONL file for new messages
+   - Track message index in database
+   - Update database when new messages are detected
+
+5. **Message Monitoring**
+   - Monitor project directory for new Claude responses
+   - When file size increases: Read new messages from end of file
+   - Send new messages to Telegram
+   - Update database with new message index
+
+## Implementation Steps for /current_session
+
+1. **Check Current Session**
+   - Retrieve current session from user context
+   - Validate session exists in database
+
+2. **Display Session Info**
+   - If session selected: Show session details (ID, cwd, timestamps, status)
+   - If no session selected: Return prompt to select session
+
+3. **Update Database**
+   - Update last_used timestamp for the session
+   - Handle database errors gracefully
+
+4. **Return Response**
+   - Send appropriate message to user
+   - Handle any errors appropriately

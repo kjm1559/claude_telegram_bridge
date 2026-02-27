@@ -1,0 +1,31 @@
+# Command Documentation
+
+## Overview
+This directory contains documentation for all Telegram commands available in the Claude Telegram Bridge.
+
+## Available Commands
+
+### /new_session
+- Creates a new Claude session with a unique UUID
+- Starts a tmux session with that UUID
+- Executes Claude with the session ID
+- Updates SQLite database with session information
+
+## Command Structure
+All commands follow the Telegram bot command format:
+```
+/{command_name}
+```
+
+## Command Implementation
+Each command is implemented as a function that:
+1. Processes the command input
+2. Performs the required operations
+3. Returns appropriate response
+4. Handles errors gracefully
+
+## Database Integration
+Commands interact with the SQLite database to:
+- Store session information
+- Track active sessions
+- Maintain session history

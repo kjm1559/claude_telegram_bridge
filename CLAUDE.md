@@ -15,6 +15,18 @@ All specification documents are stored in the `/doc` directory of this project. 
 
 Agent definitions are stored in the `/agents` directory of this project. This directory contains JSON files that define the structure and behavior of each agent, following the default agent format. The base agent definitions are documented in CLAUDE.md.
 
+### Available Agents
+
+1. **Planer** - Responsible for analyzing requirements and creating detailed implementation plans
+2. **Executer** - Implements the plans created by the Planer agent
+3. **Cheaker** - Validates the work produced by the Executer agent
+
+Each agent has a corresponding JSON file in the agents directory that defines:
+- Agent name and description
+- Core responsibilities
+- Specializations
+- Tools used
+
 ## Step 1: Planer Agent
 The Planer agent is responsible for analyzing requirements and creating detailed implementation plans.
 
@@ -68,3 +80,11 @@ The main handler coordinates between these three agents to reach the project's g
 - All code changes should be reviewed and validated
 - The process should be iterative, allowing for refinement based on feedback
 - Documentation should be maintained throughout all phases
+
+## Agent Workflow
+The three agents work in a coordinated sequence:
+1. **Planer Agent** - Analyzes requirements and creates implementation plans
+2. **Executer Agent** - Implements the plans created by the Planer agent
+3. **Cheaker Agent** - Validates the work produced by the Executer agent
+
+The feedback loop ensures continuous improvement and quality assurance throughout the development process.

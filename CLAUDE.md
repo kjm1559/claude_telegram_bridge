@@ -2,6 +2,15 @@
 
 This document outlines the action rules for the Claude Telegram Bridge project, following a structured approach using three specialized sub-agents: Planer, Executer, and Cheaker.
 
+## Documentation Structure
+
+All specification documents are stored in the `/doc` directory of this project. This directory serves as the central location for all project documentation including:
+- Technical specifications
+- API documentation
+- User guides
+- Development guidelines
+- Process documentation
+
 ## Step 1: Planer Agent
 The Planer agent is responsible for analyzing requirements and creating detailed implementation plans.
 

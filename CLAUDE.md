@@ -11,6 +11,10 @@ All specification documents are stored in the `/doc` directory of this project. 
 - Development guidelines
 - Process documentation
 
+## Agent Definitions
+
+Agent definitions are stored in the `/agents` directory of this project. This directory contains JSON files that define the structure and behavior of each agent, following the default agent format. The base agent definitions are documented in CLAUDE.md.
+
 ## Step 1: Planer Agent
 The Planer agent is responsible for analyzing requirements and creating detailed implementation plans.
 

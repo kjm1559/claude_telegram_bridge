@@ -56,7 +56,7 @@ export CLAUDE_BINARY="claude"  # optional, default: claude
 
 4. **Run the bot**
 ```bash
-python src/bot.py
+python src/main.py
 ```
 
 ## Usage
@@ -89,7 +89,7 @@ python -m pytest tests/test_bot.py -v
 python -m pytest tests/ -v --cov=src --cov-report=html
 ```
 
-### Command Types
+### Commands
 
 The system supports Telegram commands using the format `/command_name`:
 
@@ -254,11 +254,11 @@ Environment variables:
 
 ## Documentation
 
-Comprehensive documentation is available:
-- `/doc/architecture.md` - Technical architecture and system design
-- `/doc/usage.md` - Usage guide and operational instructions
-- `/doc/api.md` - API documentation and interfaces
-- `/commands/*.md` - Individual command documentation
+Comprehensive documentation is available in the `/doc` and `/commands` directories:
+- `doc/architecture.md` - Technical architecture and system design
+- `doc/usage.md` - Usage guide and operational instructions
+- `doc/api.md` - API documentation and interfaces
+- `commands/*.md` - Individual command documentation
 
 ## License
 

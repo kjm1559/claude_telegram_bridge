@@ -26,6 +26,7 @@ from command_handlers import (
     ChatInputHandler,
     SelectSessionCommand,
 )
+from formatter import formatter
 
 # Setup logging
 logging.basicConfig(
@@ -245,8 +246,16 @@ class TelegramBot:
             if not self.command_handler._check_authorization(message.chat.id):
                 self.bot.send_message(message.chat.id, self.command_handler._get_unauthorized_response())
                 return
+
+            # Start typing indicator
+            self.bot.send_chat_action(message.chat.id, "typing")
+
+            # Process message and send response
             response = self.command_handler.handle_message(message.chat.id, message.text)
             self.bot.send_message(message.chat.id, response)
+
+            # Stop typing indicator
+            self.bot.stop_chat_action(message.chat.id)
 
     def run(self):
         """Run the bot."""

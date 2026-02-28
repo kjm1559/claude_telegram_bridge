@@ -59,7 +59,37 @@ export CLAUDE_BINARY="claude"  # optional, default: claude
 python src/bot.py
 ```
 
-## Commands
+## Usage
+
+### Running the Bot
+
+The bot can be started using either `main.py` or `bot.py`:
+
+```bash
+# Recommended: using main.py
+python src/main.py
+
+# Alternative: using bot.py directly
+python src/bot.py
+```
+
+### Running Tests
+
+To run the test suite:
+
+```bash
+# Run all tests
+python -m pytest tests/ -v
+
+# Run specific test file
+python -m pytest tests/test_formatter.py -v
+python -m pytest tests/test_bot.py -v
+
+# Run with coverage
+python -m pytest tests/ -v --cov=src --cov-report=html
+```
+
+### Command Types
 
 The system supports Telegram commands using the format `/command_name`:
 
@@ -84,6 +114,7 @@ The system supports Telegram commands using the format `/command_name`:
 .
 ├── README.md
 ├── requirements.txt
+├── LICENSE
 ├── .claude/
 │   ├── CLAUDE.md
 │   └── agents/
@@ -99,12 +130,17 @@ The system supports Telegram commands using the format `/command_name`:
 │   ├── architecture.md
 │   ├── usage.md
 │   └── api.md
+├── tests/
+│   ├── __init__.py
+│   ├── test_formatter.py
+│   └── test_bot.py
 ├── src/
 │   ├── config.py
 │   ├── database.py
 │   ├── session_manager.py
 │   ├── bot.py
 │   ├── main.py
+│   ├── formatter.py
 │   └── command_handlers/
 │       ├── __init__.py
 │       ├── new_session.py
@@ -226,7 +262,21 @@ Comprehensive documentation is available:
 
 ## License
 
-[Your License Here]
+This project is licensed under the Apache License, Version 2.0 - see the [LICENSE](LICENSE) file for details.
+
+```text
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+```
 
 ## Contributing
 

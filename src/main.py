@@ -149,20 +149,13 @@ class TelegramBridge:
             return f"❌ {response}"
 
 
-def main():
-    """Main entry point for CLI usage."""
-    bot_token = os.getenv("TELEGRAM_BOT_TOKEN")
+def run_bot():
+    """Run the Telegram bot."""
+    from bot import TelegramBot
 
-    if not bot_token:
-        print("❌ Error: TELEGRAM_BOT_TOKEN environment variable not set")
-        print("Please set your Telegram bot token and try again.")
-        sys.exit(1)
-
-    bridge = TelegramBridge(bot_token)
-    print("✅ Claude Telegram Bridge initialized successfully")
-    print(f"   Database: {DATABASE_PATH}")
-    print(f"   Active sessions: {len(bridge.get_active_sessions())}")
+    bot = TelegramBot(bot_token)
+    bot.run()
 
 
 if __name__ == "__main__":
-    main()
+    run_bot()

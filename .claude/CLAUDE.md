@@ -4,12 +4,16 @@ This document outlines the action rules for the Claude Telegram Bridge project, 
 
 ## Documentation Structure
 
-All specification documents are stored in the `/doc` directory of this project. This directory serves as the central location for all project documentation including:
-- Technical specifications
-- API documentation
-- User guides
-- Development guidelines
-- Process documentation
+This project uses a structured documentation approach:
+
+- **README.md** - Primary project description, overview, and quick start guide
+- **`.claude/CLAUDE.md`** - Action rules for agent collaboration and workflow
+- **`/doc`** - Detailed technical documentation:
+  - `architecture.md` - Technical architecture and system design
+  - `usage.md` - Usage guide and operational instructions
+  - `api.md` - API documentation and interfaces
+
+All specification documents are stored in the `/doc` directory of this project.
 
 ## Agent Definitions
 

@@ -127,3 +127,79 @@ claude-bridge [command] [options]
 - `list` - List all sessions
 - `attach` - Attach to a session
 - `help` - Show help information
+
+## JSONL Response Formatting
+
+Claude responses are stored in JSONL format and formatted for Telegram display.
+
+### Input JSONL Format
+
+Claude stores conversations in JSONL files with the following structure:
+
+```json
+{"role":"user","content":"message text"}
+{"role":"assistant","content":"...","tool_calls":[{"name":"tool_name","arguments":{...}}]}
+{"role":"tool","content":"...","tool_call_id":"..."}
+{"role":"result","content":"..."}
+```
+
+### Output Format for Telegram
+
+#### 1. User Messages
+- Display the `content.text` value
+- Prefix: `👤 User:`
+
+#### 2. Assistant Messages (with Tool Calls)
+- Identify the tool being called
+- Display tool name and input parameters
+- Format:
+```
+🔧 Tool: tool_name
+📝 Input:
+{param1: value1, param2: value2}
+```
+
+#### 3. Tool Results
+- Display the `content.text` value from the result
+- Prefix: `⚙️ Result:`
+
+#### 4. System Messages
+- Not displayed (filtered out)
+
+#### 5. Final Results
+- When a `result` role message is received, display:
+```
+✅ 작업이 종료되었습니다
+```
+
+### Telegram Integration
+
+#### Typing Indicators
+- **Start**: When displaying new response, send `chat_action: typing`
+- **End**: When final result is reached, stop sending `typing` action
+
+#### Example Flow
+
+**User Input**:
+```
+👤 User: 다음 코드 리팩토링해줘
+```
+
+**Tool Call**:
+```
+🔧 Tool: read_file
+📝 Input:
+{file_path: "src/main.py"}
+```
+
+**Tool Result**:
+```
+⚙️ Result:
+def main():
+    ... (file contents)
+```
+
+**Final Result**:
+```
+✅ 작업이 종료되었습니다
+```

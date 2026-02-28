@@ -2,7 +2,10 @@
 """Telegram bot for Claude Bridge."""
 
 import os
+import sys
+import fcntl
 import logging
+import signal
 from pathlib import Path
 
 try:
@@ -150,6 +153,8 @@ class CommandHandler:
 class TelegramBot:
     """Telegram Bot for Claude Bridge."""
 
+    PID_FILE = Path(".claude_telegram_bridge_bot.pid")
+
     def __init__(self, bot_token: str):
         """Initialize Telegram Bot.
 
@@ -259,12 +264,26 @@ class TelegramBot:
             self.bot.stop_chat_action(message.chat.id)
 
     def run(self):
-        """Run the bot."""
+        """Run the bot with conflict detection and graceful handling."""
         logger.info("Starting Telegram Bot...")
         print("✅ Starting Telegram Bot...")
         print(f"   Bot Token: {self.bot.token[:15]}...")
         print("   Press Ctrl+C to stop")
-        self.bot.infinity_polling()
+
+        # Handle graceful shutdown
+        def shutdown_handler(signum, frame):
+            logger.info("Shutdown signal received. Stopping bot...")
+            self.bot.stop_polling()
+            sys.exit(0)
+
+        signal.signal(signal.SIGINT, shutdown_handler)
+        signal.signal(signal.SIGTERM, shutdown_handler)
+
+        try:
+            self.bot.infinity_polling(timeout=60)
+        except Exception as e:
+            logger.error(f"Bot polling error: {e}")
+            raise
 
 
 def main():

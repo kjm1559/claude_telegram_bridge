@@ -33,18 +33,43 @@ class JSONLFormatter:
         self.project_dir = project_dir or Path("~/.claude/projects").expanduser()
         self.max_content_length = max_content_length
 
-    def _truncate_content(self, content: str) -> str:
+    @staticmethod
+    def _escape_markdown_v2(text: str) -> str:
+        """Escape MarkdownV2 special characters.
+
+        Telegram MarkdownV2 requires escaping these characters:
+        _, *, [, ], (, ), ~, >, #, +, -, =, |, {, }, ., !
+
+        Args:
+            text: Text to escape.
+
+        Returns:
+            Escaped text safe for MarkdownV2.
+        """
+        # Escape characters in order (important for proper escaping)
+        escape_chars = ['_', '*', '[', ']', '(', ')', '~', '>', '#', '+', '=', '|', '{', '}', '.', '!']
+        for char in escape_chars:
+            text = text.replace(char, f'\{char}')
+        return text
+
+    def _truncate_content(self, content: str, escape: bool = True) -> str:
         """Truncate content to max length with ellipsis.
 
         Args:
             content: Content to truncate.
+            escape: Whether to escape MarkdownV2 characters.
 
         Returns:
             Truncated content with ellipsis if needed.
         """
         if len(content) <= self.max_content_length:
-            return content
-        return content[:self.max_content_length] + "\n... (truncated)"
+            result = content
+        else:
+            result = content[:self.max_content_length] + "\n... (truncated)"
+
+        if escape:
+            return self._escape_markdown_v2(result)
+        return result
 
     def _format_tool_args(self, args: Dict[str, Any]) -> str:
         """Format tool arguments as pretty JSON.
@@ -303,7 +328,8 @@ class TelegramResponseFormatter(JSONLFormatter):
             Tuple of (formatted response, has_complete_message).
         """
         conversation = self.format_conversation(self.get_conversation_data(session_id, cwd))
-        has_complete = "✅ 작업이 종료되었습니다" in conversation or "✅ " + self._truncate_content(content) if (content := "".join([msg.get("content", "") for msg in self.get_conversation_data(session_id, cwd) if msg.get("role") == "result"])) else False
+        result_content = "".join([msg.get("content", "") for msg in self.get_conversation_data(session_id, cwd) if msg.get("role") == "result"])
+        has_complete = "✅ 작업이 종료되었습니다" in conversation or bool(result_content)
         return conversation, has_complete
 
     def get_conversation_data(self, session_id: str, cwd: str = "/tmp") -> List[Dict[str, Any]]:

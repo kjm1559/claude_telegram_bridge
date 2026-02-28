@@ -182,7 +182,8 @@ class TelegramBot:
                 "`/current_session` - Show selected session\n"
                 "`/interrupt` - Stop running processes\n"
                 "`/help` - Show all commands\n\n"
-                "Type `/help` to see all available commands."
+                "Type `/help` to see all available commands.",
+                parse_mode="MarkdownV2"
             )
 
         @self.bot.message_handler(commands=["help"])
@@ -191,60 +192,60 @@ class TelegramBot:
                 return
             text = message.text
             success, response = self.command_handler.process_command(message.chat.id, text)
-            self.bot.send_message(message.chat.id, f"{response}")
+            self.bot.send_message(message.chat.id, f"{response}", parse_mode="MarkdownV2")
 
         @self.bot.message_handler(commands=["new_session"])
         def handle_new_session(message):
             if not self.command_handler._check_authorization(message.chat.id):
-                self.bot.send_message(message.chat.id, self.command_handler._get_unauthorized_response())
+                self.bot.send_message(message.chat.id, self.command_handler._get_unauthorized_response(), parse_mode="MarkdownV2")
                 return
             response = self.command_handler.process_command(message.chat.id, message.text)
-            self.bot.send_message(message.chat.id, response)
+            self.bot.send_message(message.chat.id, response, parse_mode="MarkdownV2")
 
         @self.bot.message_handler(commands=["sessions"])
         def handle_sessions(message):
             if not self.command_handler._check_authorization(message.chat.id):
-                self.bot.send_message(message.chat.id, self.command_handler._get_unauthorized_response())
+                self.bot.send_message(message.chat.id, self.command_handler._get_unauthorized_response(), parse_mode="MarkdownV2")
                 return
             response = self.command_handler.process_command(message.chat.id, message.text)
-            self.bot.send_message(message.chat.id, response)
+            self.bot.send_message(message.chat.id, response, parse_mode="MarkdownV2")
 
         @self.bot.message_handler(commands=["end_session"])
         def handle_end_session(message):
             if not self.command_handler._check_authorization(message.chat.id):
-                self.bot.send_message(message.chat.id, self.command_handler._get_unauthorized_response())
+                self.bot.send_message(message.chat.id, self.command_handler._get_unauthorized_response(), parse_mode="MarkdownV2")
                 return
             response = self.command_handler.process_command(message.chat.id, message.text)
-            self.bot.send_message(message.chat.id, response)
+            self.bot.send_message(message.chat.id, response, parse_mode="MarkdownV2")
 
         @self.bot.message_handler(commands=["current_session"])
         def handle_current_session(message):
             if not self.command_handler._check_authorization(message.chat.id):
-                self.bot.send_message(message.chat.id, self.command_handler._get_unauthorized_response())
+                self.bot.send_message(message.chat.id, self.command_handler._get_unauthorized_response(), parse_mode="MarkdownV2")
                 return
             response = self.command_handler.process_command(message.chat.id, message.text)
-            self.bot.send_message(message.chat.id, response)
+            self.bot.send_message(message.chat.id, response, parse_mode="MarkdownV2")
 
         @self.bot.message_handler(commands=["interrupt"])
         def handle_interrupt(message):
             if not self.command_handler._check_authorization(message.chat.id):
-                self.bot.send_message(message.chat.id, self.command_handler._get_unauthorized_response())
+                self.bot.send_message(message.chat.id, self.command_handler._get_unauthorized_response(), parse_mode="MarkdownV2")
                 return
             response = self.command_handler.process_command(message.chat.id, message.text)
-            self.bot.send_message(message.chat.id, response)
+            self.bot.send_message(message.chat.id, response, parse_mode="MarkdownV2")
 
         @self.bot.message_handler(commands=["select_session"])
         def handle_select_session(message):
             if not self.command_handler._check_authorization(message.chat.id):
-                self.bot.send_message(message.chat.id, self.command_handler._get_unauthorized_response())
+                self.bot.send_message(message.chat.id, self.command_handler._get_unauthorized_response(), parse_mode="MarkdownV2")
                 return
             response = self.command_handler.process_command(message.chat.id, message.text)
-            self.bot.send_message(message.chat.id, response)
+            self.bot.send_message(message.chat.id, response, parse_mode="MarkdownV2")
 
         @self.bot.message_handler(func=lambda m: True)
         def handle_chat_message(message):
             if not self.command_handler._check_authorization(message.chat.id):
-                self.bot.send_message(message.chat.id, self.command_handler._get_unauthorized_response())
+                self.bot.send_message(message.chat.id, self.command_handler._get_unauthorized_response(), parse_mode="MarkdownV2")
                 return
 
             # Start typing indicator
@@ -252,7 +253,7 @@ class TelegramBot:
 
             # Process message and send response
             response = self.command_handler.handle_message(message.chat.id, message.text)
-            self.bot.send_message(message.chat.id, response)
+            self.bot.send_message(message.chat.id, response, parse_mode="MarkdownV2")
 
             # Stop typing indicator
             self.bot.stop_chat_action(message.chat.id)

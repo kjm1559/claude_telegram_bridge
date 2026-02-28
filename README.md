@@ -63,14 +63,15 @@ Comprehensive documentation is available in the `/doc` directory:
 ```
 .
 ├── README.md
-├── CLAUDE.md
+├── .claude/
+│   ├── CLAUDE.md
+│   └── agents/
+│       ├── planer.json
+│       ├── executer.json
+│       └── cheaker.json
 ├── doc/
 │   ├── architecture.md
 │   ├── usage.md
 │   └── api.md
-├── agents/
-│   ├── planer.json
-│   ├── executer.json
-│   └── cheaker.json
 └── ...
 ```

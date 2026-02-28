@@ -2,8 +2,6 @@
 """Telegram bot for Claude Bridge."""
 
 import os
-import sys
-import fcntl
 import logging
 import signal
 from pathlib import Path
@@ -263,27 +261,95 @@ class TelegramBot:
             # Stop typing indicator
             self.bot.stop_chat_action(message.chat.id)
 
+    def _check_existing_instance(self) -> bool:
+        """Check if another bot instance is already running.
+
+        Returns:
+            True if another instance is running, False otherwise.
+        """
+        if self.PID_FILE.exists():
+            try:
+                with open(self.PID_FILE, "r") as f:
+                    old_pid = int(f.read().strip())
+                # Check if process is still running
+                try:
+                    os.kill(old_pid, 0)
+                    logger.error(f"Another bot instance is already running (PID: {old_pid})")
+                    print(f"❌ Another bot instance is already running (PID: {old_pid})")
+                    return True
+                except ProcessLookupError:
+                    # Process is not running, can remove stale PID file
+                    logger.info(f"Found stale PID file for non-running process ({old_pid})")
+            except (ValueError, IOError) as e:
+                logger.warning(f"Error reading PID file: {e}")
+        return False
+
+    def _write_pid_file(self):
+        """Write PID file for process locking.
+
+        Raises:
+            RuntimeError: If another instance appears to be running.
+        """
+        if self._check_existing_instance():
+            raise RuntimeError("Cannot start: another instance is running")
+
+        with open(self.PID_FILE, "w") as f:
+            f.write(str(os.getpid()))
+        logger.info(f"PID file created: {self.PID_FILE} (PID: {os.getpid()})")
+
+    def _remove_pid_file(self):
+        """Remove PID file on shutdown."""
+        if self.PID_FILE.exists():
+            try:
+                self.PID_FILE.unlink()
+                logger.info(f"PID file removed: {self.PID_FILE}")
+            except IOError as e:
+                logger.warning(f"Error removing PID file: {e}")
+
     def run(self):
         """Run the bot with conflict detection and graceful handling."""
         logger.info("Starting Telegram Bot...")
-        print("✅ Starting Telegram Bot...")
+        print("\u2705 Starting Telegram Bot...")
         print(f"   Bot Token: {self.bot.token[:15]}...")
         print("   Press Ctrl+C to stop")
 
+        # Write PID file for process locking
+        try:
+            self._write_pid_file()
+        except RuntimeError as e:
+            logger.error(f"{e}")
+            return
+
         # Handle graceful shutdown
+        self._shutdown_requested = False
+
         def shutdown_handler(signum, frame):
             logger.info("Shutdown signal received. Stopping bot...")
+            self._shutdown_requested = True
             self.bot.stop_polling()
-            sys.exit(0)
 
-        signal.signal(signal.SIGINT, shutdown_handler)
-        signal.signal(signal.SIGTERM, shutdown_handler)
+        signal(signal.SIGINT, shutdown_handler)
+        signal(signal.SIGTERM, shutdown_handler)
 
         try:
             self.bot.infinity_polling(timeout=60)
+        except telebot.apihelper.ApiTelegramException as e:
+            # Handle conflict errors (Error 409)
+            if e.result and e.result.get("error_code") == 409:
+                logger.error("Bot conflict: Terminated by another getUpdates request")
+                print("\n❌ Bot conflict detected. This may mean:")
+                print("   - Another bot instance is already running")
+                print("   - Multiple getUpdates requests are active simultaneously")
+                print("\nPlease ensure only one bot instance is running.")
+            else:
+                logger.error(f"Telegram API error: {e}")
+                raise
         except Exception as e:
             logger.error(f"Bot polling error: {e}")
             raise
+        finally:
+            # Clean up PID file
+            self._remove_pid_file()
 
 
 def main():

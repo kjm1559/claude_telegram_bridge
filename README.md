@@ -43,6 +43,8 @@ The system supports Telegram commands using the format `/command_name`:
 - `/sessions` - Lists all currently active Claude sessions
 - `/end_session {uuid}` - Terminates a specific Claude session by UUID and updates database
 - `/current_session` - Displays currently selected Claude session information
+- `/interrupt` - Sends interrupt signal (Escape key) to stop running Claude processes
+- `/help` - Displays available commands and their usage
 
 ## Chat Input Handling
 When users send chat messages (non-command inputs):

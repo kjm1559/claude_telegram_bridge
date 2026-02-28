@@ -41,7 +41,7 @@ The bridge will:
 
 The system maintains a SQLite database at:
 ```
-~/.claude_telegram_bridge/sessions.db
+~/.claude/projects/claude_telegram_bridge/data/sessions.db
 ```
 
 The database contains session information including:
@@ -65,5 +65,5 @@ The bridge supports configuration through environment variables or configuration
 3. **Permission denied**: Ensure the bridge script has execute permissions
 
 ### Debugging
-- Check database contents: `sqlite3 ~/.claude_telegram_bridge/sessions.db "SELECT * FROM sessions;"`
+- Check database contents: `sqlite3 ~/.claude/projects/claude_telegram_bridge/data/sessions.db "SELECT * FROM sessions;"`
 - View tmux sessions: `tmux ls`

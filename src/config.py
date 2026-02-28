@@ -4,7 +4,9 @@ import os
 from pathlib import Path
 
 # Base directory
-BASE_DIR = Path.home() / ".claude_telegram_bridge"
+# Using .claude/projects/<project-name>/data to align with Claude conversation storage structure
+# This makes project data appear in the Claude conversation memory for the specific project
+BASE_DIR = (Path.home() / ".claude/projects" / Path(__file__).resolve().parent.parent.name / "data")
 
 # Database configuration
 DATABASE_PATH = BASE_DIR / "sessions.db"

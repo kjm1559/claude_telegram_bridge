@@ -13,7 +13,7 @@ except ImportError:
     print("Install with: pip install python-telegram-bot")
     raise
 
-from config import BASE_DIR, TELEGRAM_BOT_TOKEN
+from config import BASE_DIR, TELEGRAM_BOT_TOKEN, is_chat_allowed
 from database import Database
 from session_manager import SessionManager
 from command_handlers import (
@@ -60,6 +60,29 @@ class CommandHandler:
         }
 
         self.chat_input = ChatInputHandler(session_manager)
+
+    def _check_authorization(self, chat_id: int) -> bool:
+        """Check if chat is authorized to use the bot.
+
+        Args:
+            chat_id: Telegram chat ID.
+
+        Returns:
+            True if authorized, False otherwise.
+        """
+        if is_chat_allowed(chat_id):
+            return True
+        logger.warning(f"Unauthorized chat attempt from chat_id: {chat_id}")
+        return False
+
+    def _get_unauthorized_response(self) -> str:
+        """Get unauthorized access response message.
+
+        Returns:
+            Response message text.
+        """
+        return ("❌ Access denied. This bot is restricted to authorized users only.\n"
+                "Please contact the administrator.")
 
     def process_command(self, chat_id: int, message: str) -> str:
         """Process a Telegram command.
@@ -145,6 +168,8 @@ class TelegramBot:
 
         @self.bot.message_handler(commands=["start"])
         def handle_start(message):
+            if not self.command_handler._check_authorization(message.chat.id):
+                return
             self.bot.send_message(
                 message.chat.id,
                 "👋 Welcome to Claude Telegram Bridge!\n\n"
@@ -161,42 +186,65 @@ class TelegramBot:
 
         @self.bot.message_handler(commands=["help"])
         def handle_help(message):
+            if not self.command_handler._check_authorization(message.chat.id):
+                return
             text = message.text
             success, response = self.command_handler.process_command(message.chat.id, text)
             self.bot.send_message(message.chat.id, f"{response}")
 
         @self.bot.message_handler(commands=["new_session"])
         def handle_new_session(message):
+            if not self.command_handler._check_authorization(message.chat.id):
+                self.bot.send_message(message.chat.id, self.command_handler._get_unauthorized_response())
+                return
             response = self.command_handler.process_command(message.chat.id, message.text)
             self.bot.send_message(message.chat.id, response)
 
         @self.bot.message_handler(commands=["sessions"])
         def handle_sessions(message):
+            if not self.command_handler._check_authorization(message.chat.id):
+                self.bot.send_message(message.chat.id, self.command_handler._get_unauthorized_response())
+                return
             response = self.command_handler.process_command(message.chat.id, message.text)
             self.bot.send_message(message.chat.id, response)
 
         @self.bot.message_handler(commands=["end_session"])
         def handle_end_session(message):
+            if not self.command_handler._check_authorization(message.chat.id):
+                self.bot.send_message(message.chat.id, self.command_handler._get_unauthorized_response())
+                return
             response = self.command_handler.process_command(message.chat.id, message.text)
             self.bot.send_message(message.chat.id, response)
 
         @self.bot.message_handler(commands=["current_session"])
         def handle_current_session(message):
+            if not self.command_handler._check_authorization(message.chat.id):
+                self.bot.send_message(message.chat.id, self.command_handler._get_unauthorized_response())
+                return
             response = self.command_handler.process_command(message.chat.id, message.text)
             self.bot.send_message(message.chat.id, response)
 
         @self.bot.message_handler(commands=["interrupt"])
         def handle_interrupt(message):
+            if not self.command_handler._check_authorization(message.chat.id):
+                self.bot.send_message(message.chat.id, self.command_handler._get_unauthorized_response())
+                return
             response = self.command_handler.process_command(message.chat.id, message.text)
             self.bot.send_message(message.chat.id, response)
 
         @self.bot.message_handler(commands=["select_session"])
         def handle_select_session(message):
+            if not self.command_handler._check_authorization(message.chat.id):
+                self.bot.send_message(message.chat.id, self.command_handler._get_unauthorized_response())
+                return
             response = self.command_handler.process_command(message.chat.id, message.text)
             self.bot.send_message(message.chat.id, response)
 
         @self.bot.message_handler(func=lambda m: True)
         def handle_chat_message(message):
+            if not self.command_handler._check_authorization(message.chat.id):
+                self.bot.send_message(message.chat.id, self.command_handler._get_unauthorized_response())
+                return
             response = self.command_handler.handle_message(message.chat.id, message.text)
             self.bot.send_message(message.chat.id, response)
 

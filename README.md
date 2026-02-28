@@ -176,7 +176,8 @@ When users send chat messages (non-command inputs):
 ## Configuration
 
 Environment variables:
-- `TELEGRAM_BOT_TOKEN` - Required: Your Telegram bot API token
+- `TELEGRAM_BOT_TOKEN` - **Required**: Your Telegram bot API token
+- `TELEGRAM_CHAT_ID` - **Optional**: Comma-separated list of authorized chat IDs (e.g., `123456789,987654321`). If not set, all users can use the bot.
 - `CLAUDE_BINARY` - Optional: Path to Claude binary (default: "claude")
 - `TMUX_SESSION_PREFIX` - Optional: Prefix for tmux session names
 - `CLAUDE_SESSION_DIR` - Optional: Directory for session storage (default: ~/.claude_telegram_bridge)

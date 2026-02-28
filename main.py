@@ -5,8 +5,9 @@ import os
 import sys
 from pathlib import Path
 
-# Add parent directory to path for imports
-sys.path.insert(0, str(Path(__file__).parent))
+# Add src directory to path for imports
+SRC_DIR = Path(__file__).parent / "src"
+sys.path.insert(0, str(SRC_DIR))
 
 from config import BASE_DIR, DATABASE_PATH
 from database import Database
@@ -152,8 +153,13 @@ class TelegramBridge:
 def run_bot():
     """Run the Telegram bot."""
     from bot import TelegramBot
+    from config import TELEGRAM_BOT_TOKEN
 
-    bot = TelegramBot(bot_token)
+    if not TELEGRAM_BOT_TOKEN:
+        print("❌ Error: TELEGRAM_BOT_TOKEN environment variable not set")
+        sys.exit(1)
+
+    bot = TelegramBot(TELEGRAM_BOT_TOKEN)
     bot.run()
 
 

@@ -1,1 +1,1 @@
-# Tests package for Claude Telegram Bridge
+"""Test package for Claude Telegram Bridge."""

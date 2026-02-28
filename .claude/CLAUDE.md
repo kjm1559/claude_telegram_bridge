@@ -12,8 +12,28 @@ This project uses a structured documentation approach:
   - `architecture.md` - Technical architecture and system design
   - `usage.md` - Usage guide and operational instructions
   - `api.md` - API documentation and interfaces
+- **`/tests`** - All test code files must be placed in this directory
 
 All specification documents are stored in the `/doc` directory of this project.
+All test code files must be placed in the `/tests` directory of this project.
+
+## Test Code Structure
+
+All test code must be placed in the `tests/` directory at the root of the project.
+
+### Test File Naming Convention
+- Test files must be named with the `test_` prefix (e.g., `test_bot.py`, `test_command_handlers.py`)
+- Each source file should have a corresponding test file (e.g., `src/bot.py` → `tests/test_bot.py`)
+
+### Test Organization
+- `tests/__init__.py` - Package initialization file
+- `tests/test_*.py` - Individual test files for each module
+
+### Test Requirements
+- All tests must be written using pytest framework
+- Tests must be self-contained and not require external dependencies beyond what's in the project
+- Mock external services (Telegram API, Claude API) when writing tests
+- Tests should be deterministic and not depend on timing or external state
 
 ## Agent Definitions
 

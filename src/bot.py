@@ -328,21 +328,27 @@ class TelegramBot:
             self._shutdown_requested = True
             self.bot.stop_polling()
 
-        signal(signal.SIGINT, shutdown_handler)
-        signal(signal.SIGTERM, shutdown_handler)
+        signal.signal(signal.SIGINT, shutdown_handler)
+        signal.signal(signal.SIGTERM, shutdown_handler)
 
         try:
-            self.bot.infinity_polling(timeout=60)
+            # CatchConflictException 을 사용하여 409 에러를 자동으로 처리
+            self.bot.infinity_polling(timeout=60, allowed_updates=[])
         except telebot.apihelper.ApiTelegramException as e:
-            # Handle conflict errors (Error 409)
-            if e.result and e.result.get("error_code") == 409:
-                logger.error("Bot conflict: Terminated by another getUpdates request")
-                print("\n❌ Bot conflict detected. This may mean:")
+            error_code = None
+            if e.result:
+                error_code = e.result.get("error_code")
+
+            # Handle conflict errors (Error 409) - do not re-raise, exit gracefully
+            if error_code == 409:
+                logger.error("Bot conflict (409): Terminated by another getUpdates request")
+                print("\n❌ Bot conflict detected (Error 409). This means:")
                 print("   - Another bot instance is already running")
-                print("   - Multiple getUpdates requests are active simultaneously")
-                print("\nPlease ensure only one bot instance is running.")
+                print("   - Telegram terminated this bot's polling")
+                print("\nExiting gracefully. Please ensure only one bot instance is running.")
+                return  # Exit gracefully, do not re-raise
             else:
-                logger.error(f"Telegram API error: {e}")
+                logger.error(f"Telegram API error (code: {error_code}): {e}")
                 raise
         except Exception as e:
             logger.error(f"Bot polling error: {e}")

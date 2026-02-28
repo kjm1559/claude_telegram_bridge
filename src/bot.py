@@ -151,7 +151,7 @@ class CommandHandler:
 class TelegramBot:
     """Telegram Bot for Claude Bridge."""
 
-    PID_FILE = Path(".claude_telegram_bridge_bot.pid")
+    PID_FILE = Path(BASE_DIR) / ".claude_telegram_bridge_bot.pid"
 
     def __init__(self, bot_token: str):
         """Initialize Telegram Bot.

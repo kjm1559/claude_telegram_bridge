@@ -116,6 +116,38 @@ class CommandHandler:
 - Invalid UUID format
 - tmux session not found
 - JSONL file monitoring failures
+- Interrupt command failures
+- Help command failures
+
+## Implementation Steps for /interrupt
+
+1. **Session Check**
+   - Verify that a session is currently selected
+   - Retrieve session ID from user context
+
+2. **Send Interrupt**
+   - Execute `tmux send-keys -t {session_id} Escape`
+   - Verify interrupt was sent successfully
+
+3. **Return Response**
+   - Send confirmation message
+   - Include session information
+   - Handle any errors appropriately
+
+## Implementation Steps for /help
+
+1. **Generate Help Content**
+   - Compile list of all available commands
+   - Add descriptions for each command
+   - Format response for Telegram
+
+2. **Handle Specific Command Help**
+   - If command specified: Show detailed help for that command
+   - If no command specified: Show general help
+
+3. **Return Response**
+   - Send formatted help message to user
+   - Handle any errors appropriately
 
 ## Chat Input Handling
 

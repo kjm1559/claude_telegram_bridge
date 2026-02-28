@@ -25,6 +25,14 @@ This directory contains documentation for all Telegram commands and input handli
 - Displays currently selected Claude session information
 - If no session selected, prompts user to select one
 
+### /interrupt
+- Sends interrupt signal to stop running Claude processes
+- Uses `tmux send-keys -t {session_id} Escape` to send Escape key
+
+### /help
+- Displays all available commands with descriptions
+- Shows usage examples for each command
+
 ## Input Handling
 ### Chat Messages
 - When user sends text (non-command input):

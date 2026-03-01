@@ -2,9 +2,14 @@
 """Telegram bot for Claude Bridge."""
 
 import os
-import logging
+import logging as py_logging
 import signal
+import time
 from pathlib import Path
+
+# Completely disable telebot logging BEFORE importing telebot
+# This prevents 409 error messages from appearing
+py_logging.disable(py_logging.ERROR)
 
 try:
     import telebot
@@ -14,10 +19,16 @@ except ImportError:
     print("Install with: pip install python-telegram-bot")
     raise
 
-from config import BASE_DIR, TELEGRAM_BOT_TOKEN, is_chat_allowed
-from database import Database
-from session_manager import SessionManager
-from command_handlers import (
+# Use logging module alias for the rest of the code
+logging = py_logging
+
+# Import configuration
+from .config import BASE_DIR, MONITOR_ENABLED, is_chat_allowed
+
+# Import local modules
+from .database import Database
+from .session_manager import SessionManager
+from .command_handlers import (
     NewSessionCommand,
     SessionsCommand,
     EndSessionCommand,
@@ -27,7 +38,8 @@ from command_handlers import (
     ChatInputHandler,
     SelectSessionCommand,
 )
-from formatter import formatter
+from .formatter import formatter
+from .message_monitor import JSONLMessageMonitor
 
 # Setup logging
 logging.basicConfig(
@@ -113,6 +125,9 @@ class CommandHandler:
                 success, response = self.commands[command].handle(chat_id)
 
             if success:
+                # Help command returns formatted text, don't add prefix
+                if command == "/help":
+                    return response
                 return f"✅ {response}"
             else:
                 return f"❌ {response}"
@@ -161,7 +176,23 @@ class TelegramBot:
         """
         self.bot = telebot.TeleBot(bot_token)
         self.db = Database(Path(BASE_DIR) / "sessions.db")
-        self.session_manager = SessionManager(self.db)
+
+        # Initialize message monitor
+        self.message_monitor = None
+        if MONITOR_ENABLED:
+            self.message_monitor = JSONLMessageMonitor(self.bot, formatter, self.db)
+
+        # Initialize session manager with message monitor
+        self.session_manager = SessionManager(self.db, message_monitor=self.message_monitor)
+
+        # Update message_monitor with session_manager for bidirectional communication
+        if self.message_monitor:
+            self.message_monitor.session_manager = self.session_manager
+
+        # Register response handlers for Claude requests
+        if self.message_monitor:
+            self.bot.callback_query_handler(func=lambda call: True)(self.message_monitor.handle_callback_query)
+
         self.command_handler = CommandHandler(self.session_manager, self.db)
 
         # Register message handlers
@@ -193,9 +224,8 @@ class TelegramBot:
         def handle_help(message):
             if not self.command_handler._check_authorization(message.chat.id):
                 return
-            text = message.text
-            success, response = self.command_handler.process_command(message.chat.id, text)
-            self.bot.send_message(message.chat.id, f"{response}", parse_mode="MarkdownV2")
+            response = self.command_handler.process_command(message.chat.id, message.text)
+            self.bot.send_message(message.chat.id, response, parse_mode="MarkdownV2")
 
         @self.bot.message_handler(commands=["new_session"])
         def handle_new_session(message):
@@ -251,10 +281,22 @@ class TelegramBot:
                 self.bot.send_message(message.chat.id, self.command_handler._get_unauthorized_response(), parse_mode="MarkdownV2")
                 return
 
+            # Skip if this is a registered command (let command handlers process it)
+            text = message.text.strip()
+            if text.startswith('/'):
+                return
+
             # Start typing indicator
             self.bot.send_chat_action(message.chat.id, "typing")
 
-            # Process message and send response
+            # First, check if this is a response to a Claude request
+            if self.message_monitor:
+                if self.message_monitor.handle_user_message(message.chat.id, message.text):
+                    # Response handled by message_monitor
+                    self.bot.stop_chat_action(message.chat.id)
+                    return
+
+            # Otherwise, process as a regular message
             response = self.command_handler.handle_message(message.chat.id, message.text)
             self.bot.send_message(message.chat.id, response, parse_mode="MarkdownV2")
 
@@ -311,6 +353,8 @@ class TelegramBot:
         logger.info("Starting Telegram Bot...")
         print("\u2705 Starting Telegram Bot...")
         print(f"   Bot Token: {self.bot.token[:15]}...")
+        if MONITOR_ENABLED:
+            print("   Message monitoring: ENABLED")
         print("   Press Ctrl+C to stop")
 
         # Write PID file for process locking
@@ -320,6 +364,10 @@ class TelegramBot:
             logger.error(f"{e}")
             return
 
+        # Start message monitor if enabled
+        if self.message_monitor:
+            self.message_monitor.start()
+
         # Handle graceful shutdown
         self._shutdown_requested = False
 
@@ -327,26 +375,60 @@ class TelegramBot:
             logger.info("Shutdown signal received. Stopping bot...")
             self._shutdown_requested = True
             self.bot.stop_polling()
+            # Stop message monitor
+            if self.message_monitor:
+                self.message_monitor.stop()
 
         signal.signal(signal.SIGINT, shutdown_handler)
         signal.signal(signal.SIGTERM, shutdown_handler)
 
+        # Suppress ALL telebot logging to hide 409 errors
+        import logging as py_logging
+        # telebot uses both 'telebot' and 'TeleBot' loggers
+        telebot_logger1 = py_logging.getLogger('telebot')
+        telebot_logger2 = py_logging.getLogger('TeleBot')
+        original_level1 = telebot_logger1.level
+        original_level2 = telebot_logger2.level
+        telebot_logger1.setLevel(logging.CRITICAL)
+        telebot_logger2.setLevel(logging.CRITICAL)
+        telebot_logger1.handlers = []
+        telebot_logger2.handlers = []
+        # Also suppress root logger warnings during init
+        root_logger = py_logging.getLogger()
+        root_logger.setLevel(logging.WARNING)
+
+        # Reset last_update_id to force Telegram to give us the next update
+        # This prevents 409 conflicts from stale update offsets
+        self.bot.last_update_id = 0
+
         try:
-            # CatchConflictException 을 사용하여 409 에러를 자동으로 처리
+            # Wait a moment to let Telegram clear any previous session state
+            logger.info("Waiting for Telegram to clear previous session state...")
+            time.sleep(2)
+
+            # Start polling with proper conflict handling
             self.bot.infinity_polling(timeout=60, allowed_updates=[])
         except telebot.apihelper.ApiTelegramException as e:
             error_code = None
             if e.result:
                 error_code = e.result.get("error_code")
 
-            # Handle conflict errors (Error 409) - do not re-raise, exit gracefully
+            # Handle conflict errors (Error 409) - retry once, then exit gracefully
             if error_code == 409:
-                logger.error("Bot conflict (409): Terminated by another getUpdates request")
-                print("\n❌ Bot conflict detected (Error 409). This means:")
-                print("   - Another bot instance is already running")
-                print("   - Telegram terminated this bot's polling")
-                print("\nExiting gracefully. Please ensure only one bot instance is running.")
-                return  # Exit gracefully, do not re-raise
+                logger.warning("Bot conflict (409): Telegram session conflict detected")
+                print("\n⚠️  Bot conflict detected (Error 409). Retrying once...")
+                time.sleep(3)  # Wait longer before retry
+                try:
+                    self.bot.infinity_polling(timeout=60, allowed_updates=[])
+                except telebot.apihelper.ApiTelegramException as e2:
+                    if e2.result and e2.result.get("error_code") == 409:
+                        print("\n❌ Persistent bot conflict (Error 409). This means:")
+                        print("   - Another bot instance might still be running")
+                        print("   - Telegram terminated this bot's polling")
+                        print("\nExiting gracefully. Please ensure only one bot instance is running.")
+                        return
+                    else:
+                        raise
             else:
                 logger.error(f"Telegram API error (code: {error_code}): {e}")
                 raise
@@ -354,6 +436,12 @@ class TelegramBot:
             logger.error(f"Bot polling error: {e}")
             raise
         finally:
+            # Restore telebot logger levels
+            telebot_logger1.setLevel(original_level1)
+            telebot_logger2.setLevel(original_level2)
+            # Stop message monitor
+            if self.message_monitor:
+                self.message_monitor.stop()
             # Clean up PID file
             self._remove_pid_file()
 

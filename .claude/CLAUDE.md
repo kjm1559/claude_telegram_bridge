@@ -120,6 +120,7 @@ This project uses a team-based development approach with three specialized teams
 - **Executer** can participate in both Development and QA teams
 - **Planer** focuses solely on Planning team activities
 - **Cheaker** focuses solely on QA team activities
+- **ContextManager** operates across all teams as needed, triggered by context thresholds
 
 ## Agent Definitions
 
@@ -133,6 +134,7 @@ Agent definitions are stored in the `/.claude/agents` directory of this project.
 | **Architect** | Development Team | Planning Team | System Design |
 | **Executer** | Development Team | QA Team | Implementation |
 | **Cheaker** | QA Team | - | Validation |
+| **ContextManager** | - | All Teams | Memory & Context Management |
 
 ### Agent JSON Files
 Each agent has a corresponding JSON file in `.claude/agents/`:
@@ -140,6 +142,7 @@ Each agent has a corresponding JSON file in `.claude/agents/`:
 - `architect.json` - Development Team lead agent
 - `executer.json` - Development/QA Team implementation agent
 - `cheaker.json` - QA Team validation agent
+- `contextmanager.json` - Context Manager for long-term memory management
 
 ## Test Code Structure
 
@@ -217,6 +220,13 @@ This iterative process ensures continuous improvement and quality assurance thro
 
 ## Team Coordination Rules
 
+### Mandatory Workflow Rule
+**ALL code changes MUST follow this strict workflow:**
+1. **Development Team performs ALL code implementation** - No other agent should modify code
+2. **QA Team MUST test and validate** ALL changes before completion
+3. **Iterate until QA passes** - If QA finds issues, return to Development Team
+4. **Repeat until the goal is achieved** - Continue the Development → QA cycle until all requirements are met
+
 ### Handoff Requirements
 - **Planning → Development**: Detailed plan must be documented and approved
 - **Development → QA**: Code must be functional with initial tests passing
@@ -232,6 +242,108 @@ This iterative process ensures continuous improvement and quality assurance thro
 1. **Planning Gate**: Plan must be approved before development starts
 2. **Development Gate**: Code must pass initial tests before QA review
 3. **QA Gate**: All issues must be resolved before merge to main
+
+## Mandatory Development-QA Loop (필수 개발-QA 루프)
+
+### Strict Team Separation (엄격한 팀 분리)
+
+**CRITICAL**: This project enforces a mandatory sequential workflow with strict team separation:
+
+1. **Development Team Only for Coding**: Only Development Team agents (Architect, Executer) may modify code
+2. **QA Team Only for Testing**: Only QA Team agents (Cheaker) may perform testing and validation
+3. **No Skipping Phases**: NEVER skip the QA phase - all changes require testing and validation
+
+### Development-QA Loop Process
+
+```
+┌─────────────────────────────────────────────────┐
+│         DEVELOPMENT PHASE (개발팀)              │
+│  1. Architect reviews requirements              │
+│  2. Executer implements code changes            │
+│  3. Code changes completed                      │
+│  4. COMMIT AND PUSH (MANDATORY)                 │
+└─────────────────────────────────────────────────┘
+                    │
+                    ▼
+┌─────────────────────────────────────────────────┐
+│           QA PHASE (QA 팀)                      │
+│  1. Cheaker reviews implemented code            │
+│  2. Cheaker runs tests and validates            │
+│  3. Cheaker provides detailed feedback          │
+│  4. Mark as PASSED or FAILED                    │
+└─────────────────────────────────────────────────┘
+                    │
+         ┌──────────┴──────────┐
+         │                     │
+         ▼                     ▼
+    PASSED              FAILED → RETURN TO DEV TEAM
+         │                     (Fix issues based on feedback)
+         │                     └────────────────────┐
+         ▼                                          │
+┌──────────────────────────────────────────────────┘
+│     MERGE TO MAIN BRANCH                         │
+└──────────────────────────────────────────────────┘
+```
+
+### Required Steps for Every Code Change
+
+#### Step 1: Development Team Implementation
+- **Who**: Development Team agents only (Architect + Executer)
+- **What**: Implement the required changes
+- **Output**: Working code with all modifications
+
+#### Step 2: Commit and Push (MANDATORY)
+- **MANDATORY**: After every code modification, MUST commit and push:
+  ```bash
+  git add <modified-files>
+  git commit -m "<descriptive message>"
+  git push origin <branch>
+  ```
+- **Why**: Creates audit trail and enables collaborative review
+
+#### Step 3: QA Team Validation
+- **Who**: QA Team agents only (Cheaker)
+- **What**: Review, test, and validate all changes
+- **Output**: Detailed feedback report with PASSED/FAILED status
+
+#### Step 4: Iterate Until Passed
+- If QA finds issues → Return to Development Team
+- Development Team fixes issues → Repeat from Step 2
+- **Continue loop until QA marks as PASSED**
+
+### Violation of Workflow (금지 사항)
+
+- **NEVER**: Skip QA phase for "simple" or "obvious" fixes
+- **NEVER**: Merge code without QA approval
+- **NEVER**: Development Team agents perform QA tasks
+- **NEVER**: QA Team agents modify production code
+- **NEVER**: Commit code without descriptive message
+- **NEVER**: Leave code uncommitted after development
+
+## Git Workflow - Commit and Push Rule
+
+**AFTER EVERY CODE CHANGE:**
+- All code modifications MUST be committed to git with descriptive commit messages
+- Commits MUST be pushed to the remote repository immediately after completion
+- This ensures team collaboration and version history is maintained
+
+### Required Git Commands After Code Changes:
+```bash
+# Stage changes
+git add <modified-files>
+
+# Commit with descriptive message
+git commit -m "Describe what was changed and why"
+
+# Push to remote
+git push origin <branch-name>
+```
+
+### Commit Message Guidelines:
+- Be specific about what was changed
+- Explain the reason for the change
+- Reference any related issues or features
+- Example: "Fix /help command to display proper help message instead of forwarding to tmux"
 
 ## Git Workflow and Documentation
 All changes are committed to the git repository with descriptive commit messages that summarize the work done. This creates a detailed history that serves as long-term memory for the project.
@@ -256,3 +368,65 @@ git show <commit-hash>
 ```
 
 This approach ensures that all work is properly documented and can be referenced for future development, troubleshooting, or knowledge sharing.
+
+## Context Manager Agent
+
+### Purpose
+The **ContextManager** agent is responsible for maintaining long-term project memory, updating documentation with high-signal decisions, and preventing context overflow through strategic compression.
+
+### Responsibilities
+- Extract high-signal decisions, invariants, and contracts from discussions and code changes
+- Update and deduplicate entries in `.claude/CLAUDE.md` and other documentation
+- Maintain clear separation between stable documentation and session-specific notes
+- Summarize long conversations and large diffs into compact context packs
+- Prevent context overflow by applying structured compression strategies
+- Track known issues, risks, and recurring failure patterns
+- Ensure architectural decisions include rationale and impact
+
+### Specializations
+- Memory extraction and structuring
+- Loss-minimized summarization
+- Context compression
+- Decision tracking (ADR-style logging)
+- Change impact analysis
+- Signal-to-noise filtering
+
+### When to Trigger
+- Conversation exceeds ~50 interaction turns
+- Large code changes detected (>100 lines modified)
+- Architectural decisions are made
+- User explicitly requests context review or cleanup
+- Multiple sessions have accumulated significant context
+- **During coding sessions**: ContextManager MUST trigger mid-session when context grows too long to prevent overflow before task completion
+
+### Memory Strategy
+
+**Stable Sections** (persist across sessions):
+- Project Overview
+- Architecture & Invariants
+- Interfaces & Contracts
+- Decisions (with rationale)
+- Agent definitions and team structure
+
+**Volatile Sections** (session-specific):
+- Current Work Scope
+- Session Summary
+- Working Notes
+
+### Compression Policy
+
+**Trigger Conditions**:
+- Conversation exceeds token threshold
+- Large git diff detected
+- More than 20 interaction turns in session
+
+**Preserve Priority**:
+- Architectural invariants
+- Public APIs and contracts
+- Acceptance criteria
+- Known bugs and workarounds
+
+**Compress Priority**:
+- Raw logs
+- Redundant explanations
+- Speculative discussions

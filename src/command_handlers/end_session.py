@@ -5,7 +5,7 @@ import uuid as uuid_lib
 from typing import Tuple, Optional
 import re
 
-from session_manager import SessionManager
+from ..session_manager import SessionManager
 
 
 class EndSessionCommand:

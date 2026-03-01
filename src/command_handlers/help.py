@@ -41,20 +41,20 @@ class HelpCommand:
     def _get_general_help(self) -> str:
         """Get general help message."""
         return (
-            "**Available Commands**:\n\n"
-            "**Session Management**:\n"
+            "*Available Commands*:\n\n"
+            "*Session Management*:\n"
             "  `/new_session` - Creates a new Claude session with UUID, tmux session, and database update\n"
             "  `/sessions` - Lists all currently active Claude sessions\n"
             "  `/end_session {uuid}` - Terminates a specific Claude session by UUID and updates database\n"
             "  `/select_session {uuid}` - Selects a session for sending chat messages\n"
             "  `/current_session` - Displays currently selected Claude session information\n\n"
-            "**Interaction**:\n"
+            "*Interaction*:\n"
             "  `/interrupt` - Sends interrupt signal (Escape key) to stop running Claude processes\n"
             "  (Just type text to send messages to selected session)\n\n"
-            "**Help**:\n"
+            "*Help*:\n"
             "  `/help` - Displays this help message\n"
-            "  `/help <command>` - Show detailed help for a specific command\n"
-            "\nType `/help <command>` for detailed information about a specific command."
+            "  `/help <command>` - Show detailed help for a specific command\n\n"
+            "Type `/help <command>` for detailed information about a specific command."
         )
 
     def _new_session_help(self) -> str:

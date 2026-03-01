@@ -284,15 +284,25 @@ class TelegramBot:
             # Start typing indicator
             self.bot.send_chat_action(message.chat.id, "typing")
 
+            # CRITICAL: Filter out any command-like messages to prevent them from reaching LLM
+            # Commands starting with / should only be handled by command handlers, not forwarded to sessions
+            text = message.text.strip()
+            if text.startswith('/'):
+                # This should not happen due to handler filter, but add safety check
+                response = self.command_handler.handle_message(message.chat.id, text)
+                self.bot.send_message(message.chat.id, response, parse_mode="MarkdownV2")
+                self.bot.stop_chat_action(message.chat.id)
+                return
+
             # First, check if this is a response to a Claude request
             if self.message_monitor:
-                if self.message_monitor.handle_user_message(message.chat.id, message.text):
+                if self.message_monitor.handle_user_message(message.chat.id, text):
                     # Response handled by message_monitor
                     self.bot.stop_chat_action(message.chat.id)
                     return
 
             # Otherwise, process as a regular message
-            response = self.command_handler.handle_message(message.chat.id, message.text)
+            response = self.command_handler.handle_message(message.chat.id, text)
             self.bot.send_message(message.chat.id, response, parse_mode="MarkdownV2")
 
             # Stop typing indicator

@@ -4,7 +4,7 @@
 import re
 from typing import Tuple, Optional
 
-from session_manager import SessionManager
+from ..session_manager import SessionManager
 
 
 class SelectSessionCommand:

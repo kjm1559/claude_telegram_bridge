@@ -8,21 +8,23 @@ from pathlib import Path
 from typing import Optional, Dict, Tuple, List
 from datetime import datetime
 
-from config import BASE_DIR, CLAUDE_BINARY
+from .config import BASE_DIR, CLAUDE_BINARY, CLAUDE_PROJECTS_DIR
 
 
 class SessionManager:
     """Manages tmux and Claude sessions."""
 
-    def __init__(self, db, project_dir: Optional[Path] = None):
+    def __init__(self, db, project_dir: Optional[Path] = None, message_monitor = None):
         """Initialize session manager.
 
         Args:
             db: Database instance.
             project_dir: Optional project directory for session files.
+            message_monitor: Optional message monitor instance for real-time monitoring.
         """
         self.db = db
         self.project_dir = project_dir or self._create_project_dir()
+        self.message_monitor = message_monitor
 
     def _create_project_dir(self) -> Path:
         """Create project directory for session files.
@@ -34,6 +36,26 @@ class SessionManager:
         cwd = "/tmp"
         cwd_name = "tmp"  # simplified for now
         return Path(f"{cwd}/-{cwd_name}")
+
+    def get_session_file_path(self, session_id: str, cwd: str) -> Path:
+        """Compute the path to a session's JSONL file.
+
+        Args:
+            session_id: UUID of the session.
+            cwd: Working directory of the session.
+
+        Returns:
+            Path to the JSONL file.
+        """
+        # Extract project name from cwd
+        # e.g., /home/mj/claude_telegram_bridge -> -home-mj-claude-telegram-bridge
+        project_path = Path(cwd)
+
+        # Build folder name: -<path-with-hyphens>
+        path_parts = [p.replace(" ", "-") for p in project_path.parts]
+        folder_name = "-" + "-".join(path_parts)
+
+        return CLAUDE_PROJECTS_DIR / folder_name / f"{session_id}.jsonl"
 
     def generate_uuid(self) -> str:
         """Generate a new UUID for session.
@@ -109,6 +131,10 @@ class SessionManager:
 
             # Mark as inactive in database
             self.db.deactivate_session(session_id)
+
+            # Unregister from message monitor if available
+            if self.message_monitor is not None:
+                self.message_monitor.unregister_session(session_id)
 
             return True, f"Session {session_id} terminated"
 
@@ -267,6 +293,10 @@ class SessionManager:
         # Set selected session
         self.db.set_user_session(chat_id, session_id)
         self.db.update_session_last_used(session_id)
+
+        # Register with message monitor if available
+        if self.message_monitor is not None:
+            self.message_monitor.register_session(session_id, chat_id, session["cwd"])
 
         return True, f"Selected session: {session_id}"
 

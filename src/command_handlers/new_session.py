@@ -4,7 +4,7 @@
 import os
 from typing import Tuple
 
-from session_manager import SessionManager
+from ..session_manager import SessionManager
 
 
 class NewSessionCommand:

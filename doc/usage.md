@@ -2,7 +2,7 @@
 
 ## Overview
 
-This guide explains how to use the Claude Telegram Bridge for running Claude in tmux sessions with automatic session management.
+This guide explains how to use the Claude Telegram Bridge for running Claude in tmux sessions with automatic session management and real-time message monitoring.
 
 ## Getting Started
 
@@ -57,6 +57,95 @@ The bridge supports configuration through environment variables or configuration
 - `TMUX_SESSION_PREFIX` - Prefix for tmux session names
 - `CLAUDE_BINARY` - Path to Claude binary
 
+### Real-time Message Monitoring
+
+The bridge can monitor Claude session JSONL files for new messages and automatically send them to Telegram.
+
+#### JSONL File Path Structure
+
+Claude stores session messages in JSONL files at:
+```
+~/.claude/projects/<project_folder>/<session_id>.jsonl
+```
+
+For example:
+- **Project path**: `/home/mj/claude_telegram_bridge`
+- **Folder name**: `-home-mj-claude-telegram-bridge`
+- **Session file**: `~/.claude/projects/-home-mj-claude-telegram-bridge/6f1e0b88-af22-4134-ad8c-872c659dacf7.jsonl`
+
+The folder name is constructed by:
+1. Taking the full path components
+2. Replacing spaces with hyphens
+3. Joining with hyphens and prepending a hyphen
+
+#### Monitoring Configuration
+
+| Environment Variable | Default | Description |
+|---------------------|---------|-------------|
+| `MONITOR_ENABLED` | `true` | Enable/disable message monitoring. Set to `false` to disable. |
+| `MONITOR_INTERVAL` | `2.0` | Polling interval in seconds. Lower values = faster updates but more resource usage. |
+
+#### How Monitoring Works
+
+1. When a session is created or selected, the monitor starts polling the corresponding JSONL file
+2. The monitor tracks the line count of the file
+3. When new lines are detected, they are parsed and formatted for Telegram
+4. Formatted messages are sent to the Telegram chat associated with the session
+5. When a session is ended, monitoring stops automatically
+
+#### Behavior
+
+- **Automatic Registration**: Sessions are automatically registered for monitoring when created via `/new_session`
+- **Message Filtering**: System messages and empty content are filtered out by default
+- **MarkdownV2 Formatting**: Messages are formatted using Telegram's MarkdownV2 parse mode
+- **Graceful Handling**: Missing files or JSON parse errors are handled gracefully without stopping the monitor
+- `MONITOR_ENABLED` - Enable/disable real-time message monitoring (default: "true")
+- `MONITOR_INTERVAL` - Polling interval for message monitoring in seconds (default: "2.0")
+
+## Real-time Message Monitoring
+
+### Overview
+
+The bridge can monitor Claude session JSONL files and automatically send new messages to Telegram. This feature enables real-time interaction with Claude sessions without manual polling.
+
+### Session File Path Structure
+
+Claude stores session messages in JSONL files at:
+```
+~/.claude/projects/<project_folder>/<session_id>.jsonl
+```
+
+The project folder is derived from the working directory path:
+- Example: `/home/mj/claude_telegram_bridge` → `-home-mj-claude-telegram-bridge`
+- Full path: `~/.claude/projects/-home-mj-claude-telegram-bridge/6f1e0b88-af22-4134-ad8c-872c659dacf7.jsonl`
+
+### Monitoring Behavior
+
+1. When a session is created or selected, the monitor starts tracking its JSONL file
+2. The monitor polls the file at configurable intervals (default: 2 seconds)
+3. New messages are automatically formatted and sent to Telegram
+4. When a session is ended, monitoring stops automatically
+
+### Configuration Options
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `MONITOR_ENABLED` | `true` | Enable/disable monitoring feature |
+| `MONITOR_INTERVAL` | `2.0` | Polling interval in seconds |
+
+### Usage Examples
+
+```bash
+# Start bot with monitoring enabled (default)
+python main.py
+
+# Disable monitoring
+MONITOR_ENABLED=false python main.py
+
+# Set custom polling interval
+MONITOR_INTERVAL=5.0 python main.py
+```
+
 ## Troubleshooting
 
 ### Common Issues
@@ -67,3 +156,5 @@ The bridge supports configuration through environment variables or configuration
 ### Debugging
 - Check database contents: `sqlite3 ~/.claude/projects/claude_telegram_bridge/data/sessions.db "SELECT * FROM sessions;"`
 - View tmux sessions: `tmux ls`
+- Check monitoring: `ls -la ~/.claude/projects/` to see active session folders
+- View session JSONL: `tail -f ~/.claude/projects/-home-mj-claude-telegram-bridge/<session_id>.jsonl`

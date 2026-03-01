@@ -10,6 +10,7 @@ A Telegram bot that provides a bridge for running Claude in tmux sessions with a
 - **Command Interface**: Easy-to-use Telegram commands for session management
 - **Chat Input**: Send messages directly to active sessions
 - **Interrupt Support**: Send interrupt signals to stop running processes
+- **Real-time Message Monitoring**: Automatically receive Claude session messages on Telegram by monitoring JSONL files
 
 ## Basic Functionality
 
@@ -206,8 +207,13 @@ Selects a session for messages:
 When users send chat messages (non-command inputs):
 - If a session is selected: Routes input to the tmux session using `tmux send-keys`
 - If no session is selected: Prompts user to select a session
-- Can monitor project directory for new Claude responses in JSONL files
-- Sends new messages to Telegram when detected
+- Monitors project directory for new Claude responses in JSONL files
+- Automatically sends new Claude messages to Telegram
+- **Claude request handling**:
+  - Yes/No prompts → Inline keyboard buttons [Yes] [No]
+  - Multiple choice (≤5 options) → Inline keyboard buttons
+  - Multiple choice (>5 options) → Type the option number
+  - Text input → Type your response normally
 
 ## Configuration
 
@@ -217,6 +223,8 @@ Environment variables:
 - `CLAUDE_BINARY` - Optional: Path to Claude binary (default: "claude")
 - `TMUX_SESSION_PREFIX` - Optional: Prefix for tmux session names
 - `CLAUDE_SESSION_DIR` - Optional: Directory for session storage (default: ~/.claude_telegram_bridge)
+- `MONITOR_ENABLED` - Optional: Enable real-time message monitoring (default: "true")
+- `MONITOR_INTERVAL` - Optional: Polling interval in seconds for message monitoring (default: "2.0")
 
 ## Troubleshooting
 

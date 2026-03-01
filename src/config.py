@@ -24,6 +24,11 @@ CLAUDE_BINARY = os.getenv("CLAUDE_BINARY", "claude")
 TMUX_SESSION_PREFIX = os.getenv("TMUX_SESSION_PREFIX", "")
 CLAUDE_SESSION_DIR = os.getenv("CLAUDE_SESSION_DIR", str(BASE_DIR))
 
+# Session monitoring configuration
+MONITOR_ENABLED = os.getenv("MONITOR_ENABLED", "true").lower() == "true"
+MONITOR_INTERVAL = float(os.getenv("MONITOR_INTERVAL", "2.0"))  # seconds
+CLAUDE_PROJECTS_DIR = Path.home() / ".claude" / "projects"
+
 # Authorized chat IDs (comma-separated)
 # Format: 123456789,987654321,555666777
 # If empty, all users can use the bot

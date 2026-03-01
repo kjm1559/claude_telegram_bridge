@@ -3,7 +3,7 @@
 
 from typing import Tuple
 
-from session_manager import SessionManager
+from ..session_manager import SessionManager
 
 
 class ChatInputHandler:
@@ -27,6 +27,22 @@ class ChatInputHandler:
         Returns:
             Tuple of (success, response_message).
         """
+        # Filter out command keywords (even without /) to prevent them from reaching LLM
+        # These should always be used with / prefix
+        command_keywords = {
+            'help', 'new_session', 'sessions', 'end_session',
+            'current_session', 'interrupt', 'select_session'
+        }
+        text_lower = text.strip().lower()
+        if text_lower in command_keywords or text_lower.startswith('help ') or text_lower.startswith('/'):
+            return False, (
+                "❌ This appears to be a command.
+"
+                "Please use the `/` prefix for commands (e.g., `/help` instead of `help`).
+"
+                "Use `/help` to see all available commands."
+            )
+
         # Check if session is selected
         selected_session = self.session_manager.get_selected_session(chat_id)
 

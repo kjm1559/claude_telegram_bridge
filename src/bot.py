@@ -275,15 +275,10 @@ class TelegramBot:
             response = self.command_handler.process_command(message.chat.id, message.text)
             self.bot.send_message(message.chat.id, response, parse_mode="MarkdownV2")
 
-        @self.bot.message_handler(func=lambda m: True)
+        @self.bot.message_handler(func=lambda m: m.text and not m.text.strip().startswith('/'))
         def handle_chat_message(message):
             if not self.command_handler._check_authorization(message.chat.id):
                 self.bot.send_message(message.chat.id, self.command_handler._get_unauthorized_response(), parse_mode="MarkdownV2")
-                return
-
-            # Skip if this is a registered command (let command handlers process it)
-            text = message.text.strip()
-            if text.startswith('/'):
                 return
 
             # Start typing indicator

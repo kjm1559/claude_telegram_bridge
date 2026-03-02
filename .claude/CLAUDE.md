@@ -1,432 +1,68 @@
 # Claude Telegram Bridge - Action Rules
 
-This document outlines the action rules for the Claude Telegram Bridge project, following a structured approach using three specialized sub-agents: Planer, Executer, and Cheaker.
+## Project Structure
 
-## Documentation Structure
+- **README.md** - Project description and quick start
+- **`.claude/CLAUDE.md`** - Action rules for agent collaboration
+- **`/doc`** - Technical documentation (architecture.md, usage.md, api.md)
+- **`/tests`** - All test code files (pytest framework, test_*.py naming)
+- **`/.claude/agents`** - Agent definition JSON files
 
-This project uses a structured documentation approach:
+## Team Structure
 
-- **README.md** - Primary project description, overview, and quick start guide
-- **`.claude/CLAUDE.md`** - Action rules for agent collaboration and workflow
-- **`/doc`** - Detailed technical documentation:
-  - `architecture.md` - Technical architecture and system design
-  - `usage.md` - Usage guide and operational instructions
-  - `api.md` - API documentation and interfaces
-- **`/tests`** - All test code files must be placed in this directory
+| Team | Agents | Responsibility |
+|------|--------|----------------|
+| **Planning (기획팀)** | Planer + Architect | Requirements analysis, implementation planning |
+| **Development (개발팀)** | Architect + Executer | Code implementation |
+| **QA (QA 팀)** | Cheaker + Executer | Testing and validation |
+| **ContextManager** | - | Memory & context management (across all teams) |
 
-All specification documents are stored in the `/doc` directory of this project.
-All test code files must be placed in the `/tests` directory of this project.
-
-## Team Structure and Agent Allocation
-
-This project uses a team-based development approach with three specialized teams. Each team is responsible for specific phases of the development lifecycle.
-
-### Team Definitions
-
-#### 1. Planning Team (기획팀)
-**Responsibilities:**
-- Analyze requirements and define project scope
-- Create detailed implementation plans
-- Identify potential risks and dependencies
-- Coordinate with other teams on timeline and deliverables
-
-**Assigned Agents:**
-- **Planer** - Primary agent for requirements analysis and planning
-- **Architect** - Provides high-level design input during planning
-
-**When to Use:**
-- At the start of any new feature or major change
-- When requirements are unclear or need refinement
-- When creating implementation strategies
-
-#### 2. Development Team (개발팀)
-**Responsibilities:**
-- Implement features according to the plan
-- Write clean, maintainable code
-- Ensure code aligns with system architecture
-- Handle technical challenges and bugs
-
-**Assigned Agents:**
-- **Architect** - Ensures architectural consistency and provides guidance
-- **Executer** - Primary agent for code implementation
-
-**When to Use:**
-- After planning phase is complete and approved
-- When implementing new features or refactoring
-- When fixing bugs or implementing improvements
-
-#### 3. QA Team (QA 팀)
-**Responsibilities:**
-- Review and validate implemented code
-- Run tests and verify functionality
-- Ensure code quality and adherence to standards
-- Provide feedback for improvements
-
-**Assigned Agents:**
-- **Cheaker** - Primary agent for validation and quality assurance
-- **Executer** - Assists with running tests and validating fixes
-
-**When to Use:**
-- After development phase is complete
-- Before merging code to main branch
-- When regression testing is needed
-
-### Team Workflow
+## Mandatory Workflow
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                    PROJECT START                            │
-└─────────────────────────────────────────────────────────────┘
-                           │
-                           ▼
-┌─────────────────────────────────────────────────────────────┐
-│              Planning Team (기획팀)                          │
-│  Agents: Planer + Architect                                 │
-│  Output: Detailed implementation plan                       │
-└─────────────────────────────────────────────────────────────┘
-                           │
-                           ▼
-┌─────────────────────────────────────────────────────────────┐
-│             Development Team (개발팀)                        │
-│  Agents: Architect + Executer                               │
-│  Output: Implemented code                                   │
-└─────────────────────────────────────────────────────────────┘
-                           │
-                           ▼
-┌─────────────────────────────────────────────────────────────┐
-│                 QA Team (QA 팀)                              │
-│  Agents: Cheaker + Executer                                 │
-│  Output: Validated code with feedback                       │
-└─────────────────────────────────────────────────────────────┘
-                           │
-                           ▼
-                  (Feedback Loop)
-                  └───┐
-                      │
-                      ▼
-              (Return to appropriate team)
+Planning Team → Development Team → QA Team
+                    ↓
+            (commit & push)
+                    ↓
+            (test & validate)
+                    ↓
+            PASSED → merge to main
+            FAILED → back to Development
 ```
 
-### Team Activation Rules
-
-1. **Sequential Activation**: Teams should generally work in sequence (Planning → Development → QA)
-2. **Parallel Within Teams**: Multiple agents within a team can work in parallel
-3. **Handoff Points**: Each team must complete their phase before the next team begins
-4. **Feedback Integration**: QA feedback should be routed back to the appropriate team
-
-### Agent Collaboration Guidelines
-
-- **Architect** can participate in both Planning and Development teams
-- **Executer** can participate in both Development and QA teams
-- **Planer** focuses solely on Planning team activities
-- **Cheaker** focuses solely on QA team activities
-- **ContextManager** operates across all teams as needed, triggered by context thresholds
-
-## Agent Definitions
-
-Agent definitions are stored in the `/.claude/agents` directory of this project. This directory contains JSON files that define the structure and behavior of each agent, following the default agent format.
-
-### Agent-to-Team Mapping
-
-| Agent | Primary Team | Secondary Team | Role |
-|-------|-------------|----------------|------|
-| **Planer** | Planning Team | - | Requirements Analysis |
-| **Architect** | Development Team | Planning Team | System Design |
-| **Executer** | Development Team | QA Team | Implementation |
-| **Cheaker** | QA Team | - | Validation |
-| **ContextManager** | - | All Teams | Memory & Context Management |
-
-### Agent JSON Files
-Each agent has a corresponding JSON file in `.claude/agents/`:
-- `planer.json` - Planning Team primary agent
-- `architect.json` - Development Team lead agent
-- `executer.json` - Development/QA Team implementation agent
-- `cheaker.json` - QA Team validation agent
-- `contextmanager.json` - Context Manager for long-term memory management
-
-## Test Code Structure
-
-All test code must be placed in the `tests/` directory at the root of the project.
-
-### Test File Naming Convention
-- Test files must be named with the `test_` prefix (e.g., `test_bot.py`, `test_command_handlers.py`)
-- Each source file should have a corresponding test file (e.g., `src/bot.py` → `tests/test_bot.py`)
-
-### Test Organization
-- `tests/__init__.py` - Package initialization file
-- `tests/test_*.py` - Individual test files for each module
-
-### Test Requirements
-- All tests must be written using pytest framework
-- Tests must be self-contained and not require external dependencies beyond what's in the project
-- Mock external services (Telegram API, Claude API) when writing tests
-- Tests should be deterministic and not depend on timing or external state
-
-## Main Handler Process
-
-The main handler coordinates between teams to reach the project's goals. Teams work in sequence, with clear handoff points and feedback loops.
-
-### Phase 1: Planning Team (기획팀)
-**Agents:** Planer + Architect
-**Activities:**
-1. Architect reviews overall system design requirements
-2. Planer analyzes user requirements and project goals
-3. Planer creates detailed implementation plan
-4. Both agents identify potential challenges and solutions
-5. Plan documents are created and reviewed
-
-**Deliverables:**
-- Requirements analysis document
-- Implementation plan with task breakdown
-- Risk assessment
-- Timeline estimate
-
-### Phase 2: Development Team (개발팀)
-**Agents:** Architect + Executer
-**Activities:**
-1. Architect reviews plan and validates implementation approach
-2. Architect provides architectural guidance and patterns
-3. Executer implements the plan
-4. Executer writes code and handles technical challenges
-5. Architect ensures code aligns with system architecture
-
-**Deliverables:**
-- Implemented code changes
-- Documentation updates
-- Initial test results
-
-### Phase 3: QA Team (QA 팀)
-**Agents:** Cheaker + Executer
-**Activities:**
-1. Cheaker reviews implemented code for correctness and quality
-2. Cheaker verifies that requirements have been met
-3. Cheaker runs tests and identifies any issues
-4. Cheaker validates adherence to coding standards
-5. Executer assists with test execution and fix validation
-
-**Deliverables:**
-- Code review report
-- Test results
-- Feedback and improvement suggestions
-- Final validation confirmation
-
-### Feedback Loop
-If QA identifies issues:
-1. Critical bugs → Return to Development Team
-2. Design flaws → Return to Planning Team
-3. Minor fixes → Development Team handles directly
-
-This iterative process ensures continuous improvement and quality assurance throughout development.
-
-## Team Coordination Rules
-
-### Mandatory Workflow Rule
-**ALL code changes MUST follow this strict workflow:**
-1. **Development Team performs ALL code implementation** - No other agent should modify code
-2. **QA Team MUST test and validate** ALL changes before completion
-3. **Iterate until QA passes** - If QA finds issues, return to Development Team
-4. **Repeat until the goal is achieved** - Continue the Development → QA cycle until all requirements are met
-
-### Handoff Requirements
-- **Planning → Development**: Detailed plan must be documented and approved
-- **Development → QA**: Code must be functional with initial tests passing
-- **QA → Development/Planning**: Clear feedback with issue classification
-
-### Communication Guidelines
-- Each team should document their progress and findings
-- Handoff points should include summary of work completed
-- Blockers and risks should be communicated immediately
-- All teams should maintain awareness of overall project status
-
-### Quality Gates
-1. **Planning Gate**: Plan must be approved before development starts
-2. **Development Gate**: Code must pass initial tests before QA review
-3. **QA Gate**: All issues must be resolved before merge to main
-
-## Mandatory Development-QA Loop (필수 개발-QA 루프)
-
-### Strict Team Separation (엄격한 팀 분리)
-
-**CRITICAL**: This project enforces a mandatory sequential workflow with strict team separation:
-
-1. **Development Team Only for Coding**: Only Development Team agents (Architect, Executer) may modify code
-2. **QA Team Only for Testing**: Only QA Team agents (Cheaker) may perform testing and validation
-3. **No Skipping Phases**: NEVER skip the QA phase - all changes require testing and validation
-
-### Development-QA Loop Process
-
-```
-┌─────────────────────────────────────────────────┐
-│         DEVELOPMENT PHASE (개발팀)              │
-│  1. Architect reviews requirements              │
-│  2. Executer implements code changes            │
-│  3. Code changes completed                      │
-│  4. COMMIT AND PUSH (MANDATORY)                 │
-└─────────────────────────────────────────────────┘
-                    │
-                    ▼
-┌─────────────────────────────────────────────────┐
-│           QA PHASE (QA 팀)                      │
-│  1. Cheaker reviews implemented code            │
-│  2. Cheaker runs tests and validates            │
-│  3. Cheaker provides detailed feedback          │
-│  4. Mark as PASSED or FAILED                    │
-└─────────────────────────────────────────────────┘
-                    │
-         ┌──────────┴──────────┐
-         │                     │
-         ▼                     ▼
-    PASSED              FAILED → RETURN TO DEV TEAM
-         │                     (Fix issues based on feedback)
-         │                     └────────────────────┐
-         ▼                                          │
-┌──────────────────────────────────────────────────┘
-│     MERGE TO MAIN BRANCH                         │
-└──────────────────────────────────────────────────┘
-```
-
-### Required Steps for Every Code Change
-
-#### Step 1: Development Team Implementation
-- **Who**: Development Team agents only (Architect + Executer)
-- **What**: Implement the required changes
-- **Output**: Working code with all modifications
-
-#### Step 2: Commit and Push (MANDATORY)
-- **MANDATORY**: After every code modification, MUST commit and push:
-  ```bash
-  git add <modified-files>
-  git commit -m "<descriptive message>"
-  git push origin <branch>
-  ```
-- **Why**: Creates audit trail and enables collaborative review
-
-#### Step 3: QA Team Validation
-- **Who**: QA Team agents only (Cheaker)
-- **What**: Review, test, and validate all changes
-- **Output**: Detailed feedback report with PASSED/FAILED status
-
-#### Step 4: Iterate Until Passed
-- If QA finds issues → Return to Development Team
-- Development Team fixes issues → Repeat from Step 2
-- **Continue loop until QA marks as PASSED**
-
-### Violation of Workflow (금지 사항)
-
-- **NEVER**: Skip QA phase for "simple" or "obvious" fixes
-- **NEVER**: Merge code without QA approval
-- **NEVER**: Development Team agents perform QA tasks
-- **NEVER**: QA Team agents modify production code
-- **NEVER**: Commit code without descriptive message
-- **NEVER**: Leave code uncommitted after development
-
-## Git Workflow - Commit and Push Rule
-
-**AFTER EVERY CODE CHANGE:**
-- All code modifications MUST be committed to git with descriptive commit messages
-- Commits MUST be pushed to the remote repository immediately after completion
-- This ensures team collaboration and version history is maintained
-
-### Required Git Commands After Code Changes:
-```bash
-# Stage changes
-git add <modified-files>
-
-# Commit with descriptive message
-git commit -m "Describe what was changed and why"
-
-# Push to remote
-git push origin <branch-name>
-```
-
-### Commit Message Guidelines:
-- Be specific about what was changed
-- Explain the reason for the change
-- Reference any related issues or features
-- Example: "Fix /help command to display proper help message instead of forwarding to tmux"
-
-## Git Workflow and Documentation
-All changes are committed to the git repository with descriptive commit messages that summarize the work done. This creates a detailed history that serves as long-term memory for the project.
-
-### Commit Practices
-- Each commit should include a clear, descriptive message summarizing the work completed
-- Changes should be committed and pushed after each significant task or feature implementation
-- Commit messages should be concise but informative about what was accomplished
-
-### Long-term Memory Access
-The git history serves as a comprehensive record of:
-- All implemented features and functionality
-- Development decisions and approaches
-- System architecture evolution
-- Problem-solving processes and solutions
-
-### Usage Example
-To access the project history for reference:
-```
-git log --oneline
-git show <commit-hash>
-```
-
-This approach ensures that all work is properly documented and can be referenced for future development, troubleshooting, or knowledge sharing.
-
-## Context Manager Agent
-
-### Purpose
-The **ContextManager** agent is responsible for maintaining long-term project memory, updating documentation with high-signal decisions, and preventing context overflow through strategic compression.
-
-### Responsibilities
-- Extract high-signal decisions, invariants, and contracts from discussions and code changes
-- Update and deduplicate entries in `.claude/CLAUDE.md` and other documentation
-- Maintain clear separation between stable documentation and session-specific notes
-- Summarize long conversations and large diffs into compact context packs
-- Prevent context overflow by applying structured compression strategies
-- Track known issues, risks, and recurring failure patterns
-- Ensure architectural decisions include rationale and impact
-
-### Specializations
-- Memory extraction and structuring
-- Loss-minimized summarization
-- Context compression
-- Decision tracking (ADR-style logging)
-- Change impact analysis
-- Signal-to-noise filtering
-
-### When to Trigger
-- Conversation exceeds ~50 interaction turns
-- Large code changes detected (>100 lines modified)
-- Architectural decisions are made
-- User explicitly requests context review or cleanup
-- Multiple sessions have accumulated significant context
-- **During coding sessions**: ContextManager MUST trigger mid-session when context grows too long to prevent overflow before task completion
-
-### Memory Strategy
-
-**Stable Sections** (persist across sessions):
-- Project Overview
-- Architecture & Invariants
-- Interfaces & Contracts
-- Decisions (with rationale)
-- Agent definitions and team structure
-
-**Volatile Sections** (session-specific):
-- Current Work Scope
-- Session Summary
-- Working Notes
-
-### Compression Policy
-
-**Trigger Conditions**:
-- Conversation exceeds token threshold
-- Large git diff detected
-- More than 20 interaction turns in session
-
-**Preserve Priority**:
-- Architectural invariants
-- Public APIs and contracts
-- Acceptance criteria
-- Known bugs and workarounds
-
-**Compress Priority**:
-- Raw logs
-- Redundant explanations
-- Speculative discussions
+### Critical Rules
+
+1. **Sequential Execution**: Planning → Development → QA (no skipping phases)
+2. **Team Separation**:
+   - Only Development Team modifies code
+   - Only QA Team performs testing
+3. **Git Commit After Every Change**:
+   ```bash
+   git add <files>
+   git commit -m "<descriptive message>"
+   git push origin <branch>
+   ```
+4. **No QA Skipping**: All changes require QA validation before merge
+
+### Violations (금지 사항)
+
+- ❌ Skip QA phase for any change
+- ❌ Merge without QA approval
+- ❌ Development agents performing QA tasks
+- ❌ QA agents modifying production code
+- ❌ Uncommitted code after development
+
+## ContextManager Trigger Conditions
+
+Activate when:
+- Conversation exceeds ~50 turns
+- Large code changes (>100 lines)
+- Architectural decisions made
+- Context grows too large mid-session
+
+## Test Requirements
+
+- All tests in `tests/` directory with `test_` prefix
+- Use pytest framework
+- Mock external services (Telegram API, Claude API)
+- Tests must be deterministic and self-contained

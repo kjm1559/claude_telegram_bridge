@@ -289,20 +289,21 @@ class TelegramBot:
             response = self.command_handler.process_command(message.chat.id, message.text)
             self.bot.send_message(message.chat.id, response, parse_mode="MarkdownV2")
 
-        @self.bot.message_handler(func=lambda m: m.text and not m.text.strip().startswith('/'))
+        @self.bot.message_handler(func=lambda m: m.text is not None)
         def handle_chat_message(message):
             if not self.command_handler._check_authorization(message.chat.id):
                 self.bot.send_message(message.chat.id, self.command_handler._get_unauthorized_response(), parse_mode="MarkdownV2")
                 return
 
+            text = message.text.strip()
+            logger.info(f"[BOT] handle_chat_message: chat_id={message.chat.id}, text='{text[:100]}'")
+
             # Start typing indicator
             self.bot.send_chat_action(message.chat.id, "typing")
 
-            # CRITICAL: Filter out any command-like messages to prevent them from reaching LLM
-            # Commands starting with / should only be handled by command handlers, not forwarded to sessions
-            text = message.text.strip()
+            # Handle commands starting with /
             if text.startswith('/'):
-                # This should not happen due to handler filter, but add safety check
+                logger.info(f"[BOT] Command detected in handle_chat_message: '{text[:50]}'")
                 response = self.command_handler.handle_message(message.chat.id, text)
                 self.bot.send_message(message.chat.id, response, parse_mode="MarkdownV2")
                 self.bot.stop_chat_action(message.chat.id)

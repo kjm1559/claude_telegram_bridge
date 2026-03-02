@@ -236,7 +236,11 @@ class TelegramBot:
 
         # Individual command handlers removed - all commands now handled by handle_chat_message
 
-        @self.bot.message_handler(func=lambda m: m.text is not None)
+        @self.bot.message_handler(
+            commands=["start", "help", "new_session", "sessions", "end_session",
+                      "current_session", "interrupt", "select_session"],
+            func=lambda m: m.text is not None
+        )
         def handle_chat_message(message):
             # Log that handler was called
             logger.info(f"[BOT] handle_chat_message CALLED: chat_id={message.chat.id}")

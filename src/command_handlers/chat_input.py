@@ -36,10 +36,8 @@ class ChatInputHandler:
         text_lower = text.strip().lower()
         if text_lower in command_keywords or text_lower.startswith('help ') or text_lower.startswith('/'):
             return False, (
-                "❌ This appears to be a command.
-"
-                "Please use the `/` prefix for commands (e.g., `/help` instead of `help`).
-"
+                "❌ This appears to be a command.\n"
+                "Please use the `/` prefix for commands (e.g., `/help` instead of `help`).\n"
                 "Use `/help` to see all available commands."
             )
 

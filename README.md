@@ -108,6 +108,7 @@ The system supports Telegram commands using the format `/command_name`:
 ### Chat Input
 - Send text messages directly to the selected session (after using `/select_session`)
 - If no session is selected, you'll be prompted to select one
+- **Note**: Commands must be prefixed with `/` (e.g., `/help` not `help`). Entering command keywords without `/` will return an error message.
 
 ## Project Structure
 
@@ -195,6 +196,8 @@ Stops running processes:
 Displays available commands:
 - General help with all commands
 - Detailed help for specific commands using `/help {command}`
+- **Direct processing**: Help commands are processed directly by the bot without LLM involvement
+- **Note**: Always use `/` prefix (e.g., `/help`). Without prefix, command keywords like `help` will return an error message.
 
 ### `/select_session {uuid}`
 Selects a session for messages:
@@ -289,3 +292,10 @@ limitations under the License.
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
+
+## Recent Changes
+
+### 2026-01-xx - Command Keyword Filtering
+- Added filtering for command keywords without `/` prefix
+- Prevents LLM from responding to commands like `help`, `sessions`, etc.
+- Users must use `/help`, `/sessions`, etc. with proper `/` prefix

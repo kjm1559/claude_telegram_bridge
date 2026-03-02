@@ -32,6 +32,11 @@ class ChatInputHandler:
         """
         logger.info(f"[CHAT_INPUT] handle called: chat_id={chat_id}, text='{text[:100]}'")
 
+        # CRITICAL: Remove leading '/' if present (user might have typed it)
+        # This prevents /help, /sessions etc from reaching tmux
+        text = text.lstrip('/')
+        logger.debug(f"[CHAT_INPUT] After stripping '/': text='{text}'")
+
         # Filter out command keywords (even without /) to prevent them from reaching LLM
         # These should always be used with / prefix
         command_keywords = {
@@ -46,7 +51,7 @@ class ChatInputHandler:
             text_lower.startswith('/')
         )
         if is_command:
-            logger.warning(f"[CHAT_INPUT] Blocked command keyword: '{text}'")
+            logger.warning(f"[CHAT_INPUT] Command keyword detected (blocked): text='{text}'")
             return False, (
                 "❌ This appears to be a command.\n"
                 "Please use the `/` prefix for commands (e.g., `/help` instead of `help`).\n"

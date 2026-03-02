@@ -9,7 +9,10 @@ from pathlib import Path
 
 # Completely disable telebot logging BEFORE importing telebot
 # This prevents 409 error messages from appearing
-py_logging.disable(py_logging.ERROR)
+py_logging.getLogger('telebot').setLevel(py_logging.CRITICAL)
+py_logging.getLogger('TeleBot').setLevel(py_logging.CRITICAL)
+py_logging.getLogger('telebot').handlers = []
+py_logging.getLogger('TeleBot').handlers = []
 
 try:
     import telebot

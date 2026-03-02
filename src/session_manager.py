@@ -4,11 +4,14 @@
 import subprocess
 import uuid
 import re
+import logging
 from pathlib import Path
 from typing import Optional, Dict, Tuple, List
 from datetime import datetime
 
 from .config import BASE_DIR, CLAUDE_BINARY, CLAUDE_PROJECTS_DIR
+
+logger = logging.getLogger(__name__)
 
 
 class SessionManager:
@@ -227,12 +230,15 @@ class SessionManager:
         Returns:
             Tuple of (success, message).
         """
+        logger.info(f"[SESSION] send_keys called: session_id={session_id}, command='{command[:100]}'")
         try:
             # Check if session exists
             if not self.is_session_active(session_id):
+                logger.error(f"[SESSION] Session {session_id} is not active")
                 return False, f"Session {session_id} is not active"
 
             # Send command with Enter
+            logger.info(f"[SESSION] Sending to tmux: session={session_id}, command='{command}'")
             result = subprocess.run(
                 ["tmux", "send-keys", "-t", session_id, command, "C-m"],
                 capture_output=True,
@@ -240,8 +246,10 @@ class SessionManager:
             )
 
             if result.returncode != 0:
+                logger.error(f"[SESSION] Failed to send command: {result.stderr}")
                 return False, f"Failed to send command: {result.stderr}"
 
+            logger.info(f"[SESSION] Command sent successfully to {session_id}")
             return True, f"Command sent to session {session_id}"
 
         except Exception as e:

@@ -238,12 +238,15 @@ class TelegramBot:
 
         @self.bot.message_handler(func=lambda m: m.text is not None)
         def handle_chat_message(message):
+            # Log that handler was called
+            logger.info(f"[BOT] handle_chat_message CALLED: chat_id={message.chat.id}")
+
             if not self.command_handler._check_authorization(message.chat.id):
                 self.bot.send_message(message.chat.id, self.command_handler._get_unauthorized_response(), parse_mode="MarkdownV2")
                 return
 
             text = message.text.strip()
-            logger.info(f"[BOT] handle_chat_message: chat_id={message.chat.id}, text='{text[:100]}', starts_with_slash={text.startswith('/')}, message.text={message.text}, message.command={getattr(message, 'command', None)}")
+            logger.info(f"[BOT] handle_chat_message: chat_id={message.chat.id}, text='{text[:50]}'")
 
             # Start typing indicator
             self.bot.send_chat_action(message.chat.id, "typing")

@@ -234,60 +234,7 @@ class TelegramBot:
                 parse_mode="MarkdownV2"
             )
 
-        @self.bot.message_handler(commands=["help"])
-        def handle_help(message):
-            if not self.command_handler._check_authorization(message.chat.id):
-                return
-            response = self.command_handler.process_command(message.chat.id, message.text)
-            self.bot.send_message(message.chat.id, response, parse_mode="MarkdownV2")
-
-        @self.bot.message_handler(commands=["new_session"])
-        def handle_new_session(message):
-            if not self.command_handler._check_authorization(message.chat.id):
-                self.bot.send_message(message.chat.id, self.command_handler._get_unauthorized_response(), parse_mode="MarkdownV2")
-                return
-            response = self.command_handler.process_command(message.chat.id, message.text)
-            self.bot.send_message(message.chat.id, response, parse_mode="MarkdownV2")
-
-        @self.bot.message_handler(commands=["sessions"])
-        def handle_sessions(message):
-            if not self.command_handler._check_authorization(message.chat.id):
-                self.bot.send_message(message.chat.id, self.command_handler._get_unauthorized_response(), parse_mode="MarkdownV2")
-                return
-            response = self.command_handler.process_command(message.chat.id, message.text)
-            self.bot.send_message(message.chat.id, response, parse_mode="MarkdownV2")
-
-        @self.bot.message_handler(commands=["end_session"])
-        def handle_end_session(message):
-            if not self.command_handler._check_authorization(message.chat.id):
-                self.bot.send_message(message.chat.id, self.command_handler._get_unauthorized_response(), parse_mode="MarkdownV2")
-                return
-            response = self.command_handler.process_command(message.chat.id, message.text)
-            self.bot.send_message(message.chat.id, response, parse_mode="MarkdownV2")
-
-        @self.bot.message_handler(commands=["current_session"])
-        def handle_current_session(message):
-            if not self.command_handler._check_authorization(message.chat.id):
-                self.bot.send_message(message.chat.id, self.command_handler._get_unauthorized_response(), parse_mode="MarkdownV2")
-                return
-            response = self.command_handler.process_command(message.chat.id, message.text)
-            self.bot.send_message(message.chat.id, response, parse_mode="MarkdownV2")
-
-        @self.bot.message_handler(commands=["interrupt"])
-        def handle_interrupt(message):
-            if not self.command_handler._check_authorization(message.chat.id):
-                self.bot.send_message(message.chat.id, self.command_handler._get_unauthorized_response(), parse_mode="MarkdownV2")
-                return
-            response = self.command_handler.process_command(message.chat.id, message.text)
-            self.bot.send_message(message.chat.id, response, parse_mode="MarkdownV2")
-
-        @self.bot.message_handler(commands=["select_session"])
-        def handle_select_session(message):
-            if not self.command_handler._check_authorization(message.chat.id):
-                self.bot.send_message(message.chat.id, self.command_handler._get_unauthorized_response(), parse_mode="MarkdownV2")
-                return
-            response = self.command_handler.process_command(message.chat.id, message.text)
-            self.bot.send_message(message.chat.id, response, parse_mode="MarkdownV2")
+        # Individual command handlers removed - all commands now handled by handle_chat_message
 
         @self.bot.message_handler(func=lambda m: m.text is not None)
         def handle_chat_message(message):
@@ -427,7 +374,8 @@ class TelegramBot:
             time.sleep(2)
 
             # Start polling with proper conflict handling
-            self.bot.infinity_polling(timeout=60, allowed_updates=[])
+            # allowed_updates=['message'] enables all message handlers including commands
+            self.bot.infinity_polling(timeout=60, allowed_updates=['message'])
         except telebot.apihelper.ApiTelegramException as e:
             error_code = None
             if e.result:
@@ -439,7 +387,7 @@ class TelegramBot:
                 print("\n⚠️  Bot conflict detected (Error 409). Retrying once...")
                 time.sleep(3)  # Wait longer before retry
                 try:
-                    self.bot.infinity_polling(timeout=60, allowed_updates=[])
+                    self.bot.infinity_polling(timeout=60, allowed_updates=['message'])
                 except telebot.apihelper.ApiTelegramException as e2:
                     if e2.result and e2.result.get("error_code") == 409:
                         print("\n❌ Persistent bot conflict (Error 409). This means:")

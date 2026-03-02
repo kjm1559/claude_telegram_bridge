@@ -34,7 +34,13 @@ class ChatInputHandler:
             'current_session', 'interrupt', 'select_session'
         }
         text_lower = text.strip().lower()
-        if text_lower in command_keywords or text_lower.startswith('help ') or text_lower.startswith('/'):
+        # Check for exact command keyword or command with argument (e.g., "help something")
+        is_command = (
+            text_lower in command_keywords or
+            any(text_lower.startswith(cmd + ' ') for cmd in command_keywords) or
+            text_lower.startswith('/')
+        )
+        if is_command:
             return False, (
                 "❌ This appears to be a command.\n"
                 "Please use the `/` prefix for commands (e.g., `/help` instead of `help`).\n"

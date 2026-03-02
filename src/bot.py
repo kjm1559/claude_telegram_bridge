@@ -243,7 +243,7 @@ class TelegramBot:
                 return
 
             text = message.text.strip()
-            logger.info(f"[BOT] handle_chat_message: chat_id={message.chat.id}, text='{text[:100]}'")
+            logger.info(f"[BOT] handle_chat_message: chat_id={message.chat.id}, text='{text[:100]}', starts_with_slash={text.startswith('/')}, message.text={message.text}, message.command={getattr(message, 'command', None)}")
 
             # Start typing indicator
             self.bot.send_chat_action(message.chat.id, "typing")

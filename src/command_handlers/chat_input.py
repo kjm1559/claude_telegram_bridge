@@ -32,29 +32,28 @@ class ChatInputHandler:
         """
         logger.info(f"[CHAT_INPUT] handle called: chat_id={chat_id}, text='{text[:100]}'")
 
-        # CRITICAL: Remove leading '/' if present (user might have typed it)
-        # This prevents /help, /sessions etc from reaching tmux
-        text = text.lstrip('/')
-        logger.debug(f"[CHAT_INPUT] After stripping '/': text='{text}'")
+        # Commands starting with / should be handled by bot.py, not ChatInputHandler
+        if text.strip().startswith('/'):
+            logger.warning(f"[CHAT_INPUT] Command detected (should be handled by bot.py): text='{text}'")
+            return False, (
+                "❌ This appears to be a command that should be handled by the bot.\n"
+                "Please use the command directly (e.g., `/help`).\n"
+                "Use `/help` to see all available commands."
+            )
 
-        # Filter out command keywords (even without /) to prevent them from reaching LLM
+        # Filter out command keywords (without /) to prevent them from reaching tmux
         # These should always be used with / prefix
         command_keywords = {
             'help', 'new_session', 'sessions', 'end_session',
             'current_session', 'interrupt', 'select_session'
         }
         text_lower = text.strip().lower()
-        # Check for exact command keyword or command with argument (e.g., "help something")
-        is_command = (
-            text_lower in command_keywords or
-            any(text_lower.startswith(cmd + ' ') for cmd in command_keywords) or
-            text_lower.startswith('/')
-        )
+        is_command = text_lower in command_keywords
         if is_command:
-            logger.warning(f"[CHAT_INPUT] Command keyword detected (blocked): text='{text}'")
+            logger.warning(f"[CHAT_INPUT] Command keyword detected without / prefix: text='{text}'")
             return False, (
-                "❌ This appears to be a command.\n"
-                "Please use the `/` prefix for commands (e.g., `/help` instead of `help`).\n"
+                "❌ This appears to be a command without the `/` prefix.\n"
+                "Please use `/` prefix for commands (e.g., `/help` instead of `help`).\n"
                 "Use `/help` to see all available commands."
             )
 

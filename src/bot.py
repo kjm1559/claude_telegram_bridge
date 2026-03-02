@@ -108,22 +108,30 @@ class CommandHandler:
         Returns:
             Response message text.
         """
+        logger.debug(f"[BOT] process_command called for chat_id={chat_id}, message={message[:50]}")
         parts = message.strip().split(None, 1)
         if not parts:
+            logger.warning(f"[BOT] Empty command from chat_id={chat_id}")
             return "❌ Invalid command format.\n\nType `/help` for available commands."
 
         command = parts[0].lower()
         args = parts[1] if len(parts) > 1 else ""
+        logger.info(f"[BOT] COMMAND: {command} (chat_id={chat_id}, args='{args}')")
 
         if command in self.commands:
+            logger.debug(f"[BOT] Found command handler for {command}")
             if command == "/help":
                 target_cmd = args.strip() if args else None
+                logger.info(f"[BOT] Processing /help command, target_cmd={target_cmd}")
                 success, response = self.commands["/help"].handle(chat_id, target_cmd)
             elif command in ["/end_session", "/select_session"]:
+                logger.info(f"[BOT] Processing {command} with full message")
                 success, response = self.commands[command].handle(chat_id, message.strip())
             else:
+                logger.info(f"[BOT] Processing {command} (no args)")
                 success, response = self.commands[command].handle(chat_id)
 
+            logger.debug(f"[BOT] Command {command} result: success={success}")
             if success:
                 # Help command returns formatted text, don't add prefix
                 if command == "/help":
@@ -132,6 +140,7 @@ class CommandHandler:
             else:
                 return f"❌ {response}"
         else:
+            logger.warning(f"[BOT] Unknown command: {command}")
             return f"❌ Unknown command: {command}.\n\nType `/help` for available commands."
 
     def process_chat_input(self, chat_id: int, text: str) -> str:
@@ -144,7 +153,9 @@ class CommandHandler:
         Returns:
             Response message text.
         """
+        logger.info(f"[BOT] CHAT_INPUT: chat_id={chat_id}, text={text[:100]}")
         success, response = self.chat_input.handle(chat_id, text)
+        logger.debug(f"[BOT] Chat input result: success={success}")
         return f"{'✅' if success else '❌'} {response}"
 
     def handle_message(self, chat_id: int, text: str) -> str:

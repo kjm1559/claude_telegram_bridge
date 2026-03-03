@@ -216,8 +216,6 @@ class TelegramBot:
         """Register Telegram bot message handlers."""
 
         @self.bot.message_handler(
-            commands=["start", "help", "new_session", "sessions", "end_session",
-                      "current_session", "interrupt", "select_session"],
             func=lambda m: m.text is not None
         )
         def handle_chat_message(message):

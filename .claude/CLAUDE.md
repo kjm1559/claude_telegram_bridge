@@ -52,6 +52,37 @@ Planning Team → Development Team → QA Team
 - ❌ QA agents modifying production code
 - ❌ Uncommitted code after development
 
+## ContextManager Guidelines for Sub-Agents
+
+### Using `TaskCreate` and `TaskUpdate` Tools
+
+**All sub-agents MUST use these tools to track their work:**
+
+1. **TaskCreate** - Create task when starting work:
+   ```
+   - subject: Task description
+   - description: Detailed work requirements
+   - activeForm: Current status (e.g., "수정 코드 구현 중")
+   ```
+
+2. **TaskUpdate** - Update status when progressing:
+   ```
+   - taskId: Task ID to update
+   - activeForm: New status
+   - addBlockedBy: Dependencies
+   ```
+
+3. **TaskOutput** - Retrieve output when needed
+
+4. **TaskStop** - Clean up when done
+
+### Context Management Best Practices
+
+- **Track Progress**: Update `activeForm` as work progresses
+- **Manage Dependencies**: Use `addBlockedBy` for task dependencies
+- **Monitor Status**: Check `TaskList` regularly for team updates
+- **Clean Up**: Stop tasks and delete teams when complete
+
 ## ContextManager Trigger Conditions
 
 Activate when:

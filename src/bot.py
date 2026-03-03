@@ -215,27 +215,6 @@ class TelegramBot:
     def _register_handlers(self):
         """Register Telegram bot message handlers."""
 
-        @self.bot.message_handler(commands=["start"])
-        def handle_start(message):
-            if not self.command_handler._check_authorization(message.chat.id):
-                return
-            self.bot.send_message(
-                message.chat.id,
-                "👋 Welcome to Claude Telegram Bridge!\n\n"
-                "Use the following commands to manage your Claude sessions:\n\n"
-                "`/new_session` - Create a new session\n"
-                "`/sessions` - List active sessions\n"
-                "`/end_session {uuid}` - Terminate a session\n"
-                "`/select_session {uuid}` - Select a session for messages\n"
-                "`/current_session` - Show selected session\n"
-                "`/interrupt` - Stop running processes\n"
-                "`/help` - Show all commands\n\n"
-                "Type `/help` to see all available commands.",
-                parse_mode="MarkdownV2"
-            )
-
-        # Individual command handlers removed - all commands now handled by handle_chat_message
-
         @self.bot.message_handler(
             commands=["start", "help", "new_session", "sessions", "end_session",
                       "current_session", "interrupt", "select_session"],
@@ -258,6 +237,26 @@ class TelegramBot:
             # Handle commands starting with /
             if text.startswith('/'):
                 logger.info(f"[BOT] Command detected in handle_chat_message: '{text[:50]}'")
+
+                # Handle /start command specially
+                if text.lower() == '/start':
+                    self.bot.send_message(
+                        message.chat.id,
+                        "👋 Welcome to Claude Telegram Bridge!\n\n"
+                        "Use the following commands to manage your Claude sessions:\n\n"
+                        "`/new_session` - Create a new session\n"
+                        "`/sessions` - List active sessions\n"
+                        "`/end_session {uuid}` - Terminate a session\n"
+                        "`/select_session {uuid}` - Select a session for messages\n"
+                        "`/current_session` - Show selected session\n"
+                        "`/interrupt` - Stop running processes\n"
+                        "`/help` - Show all commands\n\n"
+                        "Type `/help` to see all available commands.",
+                        parse_mode="MarkdownV2"
+                    )
+                    self.bot.stop_chat_action(message.chat.id)
+                    return
+
                 response = self.command_handler.handle_message(message.chat.id, text)
                 self.bot.send_message(message.chat.id, response, parse_mode="MarkdownV2")
                 self.bot.stop_chat_action(message.chat.id)

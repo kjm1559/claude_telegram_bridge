@@ -393,7 +393,7 @@ class TelegramBot:
                 print("\n⚠️  Bot conflict detected (Error 409). Retrying once...")
                 time.sleep(3)  # Wait longer before retry
                 try:
-                self.bot.infinity_polling(timeout=60)
+                    self.bot.infinity_polling(timeout=60)
                 except telebot.apihelper.ApiTelegramException as e2:
                     if e2.result and e2.result.get("error_code") == 409:
                         print("\n❌ Persistent bot conflict (Error 409). This means:")

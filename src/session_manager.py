@@ -4,6 +4,7 @@
 import subprocess
 import uuid
 import re
+import shlex
 import logging
 from pathlib import Path
 from typing import Optional, Dict, Tuple, List
@@ -93,8 +94,9 @@ class SessionManager:
             # Using a simple shell command for Claude
             # In production, this would be a proper Claude CLI call
             claude_cmd = f"{CLAUDE_BINARY} --session-id {session_id}"
+            quoted_claude_cmd = shlex.quote(claude_cmd)
             result = subprocess.run(
-                ["tmux", "send-keys", "-t", session_id, claude_cmd, "C-m"],
+                ["tmux", "send-keys", "-t", session_id, quoted_claude_cmd, "C-m"],
                 capture_output=True,
                 text=True
             )
@@ -230,6 +232,7 @@ class SessionManager:
         Returns:
             Tuple of (success, message).
         """
+        import time
         logger.info(f"[SESSION] send_keys called: session_id={session_id}, command='{command[:100]}'")
         try:
             # Check if session exists
@@ -237,13 +240,18 @@ class SessionManager:
                 logger.error(f"[SESSION] Session {session_id} is not active")
                 return False, f"Session {session_id} is not active"
 
-            # Send command with Enter
+            # Send command with Enter key (C-m = Control+m = Enter)
+            # Use shlex.quote to properly escape commands with spaces/special characters
             logger.info(f"[SESSION] Sending to tmux: session={session_id}, command='{command}'")
+            quoted_command = shlex.quote(command)
             result = subprocess.run(
-                ["tmux", "send-keys", "-t", session_id, command, "C-m"],
+                ["tmux", "send-keys", "-t", session_id, quoted_command, "C-m"],
                 capture_output=True,
                 text=True
             )
+
+            # Small delay to ensure tmux processes the input
+            time.sleep(0.1)
 
             if result.returncode != 0:
                 logger.error(f"[SESSION] Failed to send command: {result.stderr}")
@@ -253,6 +261,7 @@ class SessionManager:
             return True, f"Command sent to session {session_id}"
 
         except Exception as e:
+            logger.error(f"[SESSION] Exception in send_keys: {str(e)}")
             return False, f"Error sending command: {str(e)}"
 
     def get_session_info(self, session_id: str) -> Optional[Dict]:

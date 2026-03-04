@@ -223,7 +223,7 @@ class Database:
                 cursor.execute("""
                     INSERT INTO user_context (chat_id, selected_session_id)
                     VALUES (?, ?)
-                    ON CONFLICT(chat_id) DO UPDATE SET selected_session_id = ?, last_used = CURRENT_TIMESTAMP
+                    ON CONFLICT(chat_id) DO UPDATE SET selected_session_id = ?
                 """, (chat_id, session_id, session_id))
                 conn.commit()
             return True

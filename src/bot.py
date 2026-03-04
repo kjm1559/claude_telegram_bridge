@@ -44,6 +44,26 @@ from .command_handlers import (
 from .formatter import formatter
 from .message_monitor import JSONLMessageMonitor
 
+
+def escape_markdown_v2(text: str) -> str:
+    """Escape special characters for MarkdownV2 parse mode.
+
+    Telegram MarkdownV2 requires escaping these characters:
+    _ * [ ] ( ) ~ ` > # + - = | { } . !
+
+    Args:
+        text: Text to escape.
+
+    Returns:
+        Escaped text safe for MarkdownV2.
+    """
+    # Characters that need to be escaped in MarkdownV2
+    escape_chars = r"_*[]()~`>#+-=|{}.!"
+    result = text
+    for char in escape_chars:
+        result = result.replace(char, "\\" + char)
+    return result
+
 # Setup logging
 logging.basicConfig(
     level=logging.INFO,
@@ -223,11 +243,11 @@ class TelegramBot:
             logger.info(f"[BOT] handle_chat_message CALLED: chat_id={message.chat.id}")
 
             if not self.command_handler._check_authorization(message.chat.id):
-                self.bot.send_message(message.chat.id, self.command_handler._get_unauthorized_response(), parse_mode="MarkdownV2")
+                self.bot.send_message(message.chat.id, self.command_handler._get_unauthorized_response(), parse_mode="HTML")
                 return
 
             text = message.text.strip()
-            logger.info(f"[BOT] handle_chat_message: chat_id={message.chat.id}, text='{text[:50]}'")
+            logger.info(f"[BOT] handle_chat_message: chat_id={message.chat.id}, text='{text[:50]}', original={repr(message.text)}")
 
             # Start typing indicator
             self.bot.send_chat_action(message.chat.id, "typing")
@@ -238,25 +258,25 @@ class TelegramBot:
 
                 # Handle /start command specially
                 if text.lower() == '/start':
-                    self.bot.send_message(
-                        message.chat.id,
+                    welcome_msg = (
                         "👋 Welcome to Claude Telegram Bridge!\n\n"
                         "Use the following commands to manage your Claude sessions:\n\n"
-                        "`/new_session` - Create a new session\n"
-                        "`/sessions` - List active sessions\n"
-                        "`/end_session {uuid}` - Terminate a session\n"
-                        "`/select_session {uuid}` - Select a session for messages\n"
-                        "`/current_session` - Show selected session\n"
-                        "`/interrupt` - Stop running processes\n"
-                        "`/help` - Show all commands\n\n"
-                        "Type `/help` to see all available commands.",
-                        parse_mode="MarkdownV2"
+                        "<code>/new_session</code> - Create a new session\n"
+                        "<code>/sessions</code> - List active sessions\n"
+                        "<code>/end_session {uuid}</code> - Terminate a session\n"
+                        "<code>/select_session {uuid}</code> - Select a session for messages\n"
+                        "<code>/current_session</code> - Show selected session\n"
+                        "<code>/interrupt</code> - Stop running processes\n"
+                        "<code>/help</code> - Show all commands\n\n"
+                        "Type <code>/help</code> to see all available commands."
                     )
+                    self.bot.send_message(message.chat.id, welcome_msg, parse_mode="HTML")
                     self.bot.stop_chat_action(message.chat.id)
                     return
 
                 response = self.command_handler.handle_message(message.chat.id, text)
-                self.bot.send_message(message.chat.id, response, parse_mode="MarkdownV2")
+                logger.info(f"[BOT] Response for command: {repr(response[:200])}")
+                self.bot.send_message(message.chat.id, response, parse_mode="HTML")
                 self.bot.stop_chat_action(message.chat.id)
                 return
 
@@ -269,7 +289,7 @@ class TelegramBot:
 
             # Otherwise, process as a regular message
             response = self.command_handler.handle_message(message.chat.id, text)
-            self.bot.send_message(message.chat.id, response, parse_mode="MarkdownV2")
+            self.bot.send_message(message.chat.id, response, parse_mode="HTML")
 
             # Stop typing indicator
             self.bot.stop_chat_action(message.chat.id)

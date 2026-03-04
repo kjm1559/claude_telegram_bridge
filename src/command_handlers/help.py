@@ -30,8 +30,21 @@ class HelpCommand:
         """
         if command:
             # Show help for specific command
-            if command in self.commands:
-                return True, self.commands[command]()
+            # Normalize command: remove leading slash for matching
+            normalized_cmd = command.strip()
+            if not normalized_cmd.startswith('/'):
+                normalized_cmd = '/' + normalized_cmd
+            normalized_cmd = normalized_cmd.lower()
+
+            # Find matching command (case-insensitive)
+            matched_cmd = None
+            for cmd_key in self.commands:
+                if cmd_key.lower() == normalized_cmd:
+                    matched_cmd = cmd_key
+                    break
+
+            if matched_cmd:
+                return True, self.commands[matched_cmd]()
             else:
                 return False, f"Command '{command}' not found. Type /help for all commands."
         else:

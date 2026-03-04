@@ -5,7 +5,6 @@ import subprocess
 import uuid
 import re
 import time
-import shlex
 import logging
 from pathlib import Path
 from typing import Optional, Dict, Tuple, List
@@ -92,12 +91,10 @@ class SessionManager:
                 return False, f"Failed to create tmux session: {result.stderr}"
 
             # Launch Claude in the session
-            # Using a simple shell command for Claude
-            # In production, this would be a proper Claude CLI call
+            # Using -l flag to send literal string without key name lookup
             claude_cmd = f"{CLAUDE_BINARY} --session-id {session_id}"
-            quoted_claude_cmd = shlex.quote(claude_cmd)
             result = subprocess.run(
-                ["tmux", "send-keys", "-t", session_id, quoted_claude_cmd, "C-m"],
+                ["tmux", "send-keys", "-l", "-t", session_id, claude_cmd, "C-m"],
                 capture_output=True,
                 text=True
             )
@@ -241,11 +238,10 @@ class SessionManager:
                 return False, f"Session {session_id} is not active"
 
             # Send command with Enter key (C-m = Control+m = Enter)
-            # Use shlex.quote to properly escape commands with spaces/special characters
+            # Use -l flag to send literal string without key name lookup
             logger.info(f"[SESSION] Sending to tmux: session={session_id}, command='{command}'")
-            quoted_command = shlex.quote(command)
             result = subprocess.run(
-                ["tmux", "send-keys", "-t", session_id, quoted_command, "C-m"],
+                ["tmux", "send-keys", "-l", "-t", session_id, command, "C-m"],
                 capture_output=True,
                 text=True
             )

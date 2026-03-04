@@ -39,29 +39,29 @@ class HelpCommand:
             return True, self._get_general_help()
 
     def _get_general_help(self) -> str:
-        """Get general help message."""
+        """Get general help message in HTML format."""
         return (
-            "*Available Commands*:\n\n"
-            "*Session Management*:\n"
-            "  `/new_session` - Creates a new Claude session with UUID, tmux session, and database update\n"
-            "  `/sessions` - Lists all currently active Claude sessions\n"
-            "  `/end_session {uuid}` - Terminates a specific Claude session by UUID and updates database\n"
-            "  `/select_session {uuid}` - Selects a session for sending chat messages\n"
-            "  `/current_session` - Displays currently selected Claude session information\n\n"
-            "*Interaction*:\n"
-            "  `/interrupt` - Sends interrupt signal (Escape key) to stop running Claude processes\n"
-            "  (Just type text to send messages to selected session)\n\n"
-            "*Help*:\n"
-            "  `/help` - Displays this help message\n"
-            "  `/help <command>` - Show detailed help for a specific command\n\n"
-            "Type `/help <command>` for detailed information about a specific command."
+            "<b>Available Commands</b>:\n\n"
+            "<b>Session Management</b>:\n"
+            "  <code>/new_session</code> - Creates a new Claude session\n"
+            "  <code>/sessions</code> - Lists active sessions\n"
+            "  <code>/end_session {uuid}</code> - Terminate a session\n"
+            "  <code>/select_session {uuid}</code> - Select a session\n"
+            "  <code>/current_session</code> - Show selected session\n\n"
+            "<b>Interaction</b>:\n"
+            "  <code>/interrupt</code> - Stop running processes\n"
+            "  (Just type text to send messages)\n\n"
+            "<b>Help</b>:\n"
+            "  <code>/help</code> - Show all commands\n"
+            "  <code>/help \u003ccommand\u003e</code> - Show specific help\n\n"
+            "Type <code>/help</code> for details."
         )
 
     def _new_session_help(self) -> str:
-        """Get help for /new_session."""
+        """Get help for /new_session in HTML format."""
         return (
-            "/new_session - Creates a new Claude session\n\n"
-            "Usage: `/new_session`\n\n"
+            "<code>/new_session</code> - Creates a new Claude session\n\n"
+            "Usage: <code>/new_session</code>\n\n"
             "Creates a new session with:\n"
             "- Unique UUID as session ID\n"
             "- New tmux session with same name\n"
@@ -71,60 +71,60 @@ class HelpCommand:
         )
 
     def _sessions_help(self) -> str:
-        """Get help for /sessions."""
+        """Get help for /sessions in HTML format."""
         return (
-            "/sessions - Lists all active Claude sessions\n\n"
-            "Usage: `/sessions`\n\n"
+            "<code>/sessions</code> - Lists all active Claude sessions\n\n"
+            "Usage: <code>/sessions</code>\n\n"
             "Lists all currently active sessions with:\n"
             "- Session ID (UUID)\n"
             "- Working directory\n"
             "- Creation time\n"
             "- Last used time\n"
             "- Active status\n\n"
-            "Use this list to select a session with /select_session."
+            "Use this list to select a session."
         )
 
     def _end_session_help(self) -> str:
-        """Get help for /end_session."""
+        """Get help for /end_session in HTML format."""
         return (
-            "/end_session {uuid} - Terminates a Claude session\n\n"
-            "Usage: `/end_session {uuid}`\n\n"
+            "<code>/end_session {uuid}</code> - Terminates a Claude session\n\n"
+            "Usage: <code>/end_session {uuid}</code>\n\n"
             "Arguments:\n"
-            "- `{uuid}`: The session ID to terminate\n\n"
-            "Terminates the specified tmux session and marks it as inactive in database.\n"
-            "Use `/sessions` to see available session IDs."
+            "- {uuid}: The session ID to terminate\n\n"
+            "Terminates the specified tmux session and marks it as inactive.\n"
+            "Use /sessions to see available session IDs."
         )
 
     def _current_session_help(self) -> str:
-        """Get help for /current_session."""
+        """Get help for /current_session in HTML format."""
         return (
-            "/current_session - Shows currently selected session\n\n"
-            "Usage: `/current_session`\n\n"
-            "Displays information about the session currently selected for sending messages:\n"
+            "<code>/current_session</code> - Shows currently selected session\n\n"
+            "Usage: <code>/current_session</code>\n\n"
+            "Displays information about the selected session:\n"
             "- Session ID\n"
             "- Working directory\n"
             "- Creation and last used timestamps\n\n"
-            "If no session is selected, prompts you to select one."
+            "If no session is selected, prompts to select one."
         )
 
     def _interrupt_help(self) -> str:
-        """Get help for /interrupt."""
+        """Get help for /interrupt in HTML format."""
         return (
-            "/interrupt - Sends interrupt signal to stop running Claude processes\n\n"
-            "Usage: `/interrupt`\n\n"
-            "Sends Escape key to the current tmux session to interrupt running processes.\n"
+            "<code>/interrupt</code> - Sends interrupt signal\n\n"
+            "Usage: <code>/interrupt</code>\n\n"
+            "Sends Escape key to current tmux session.\n"
             "Requires a session to be selected first.\n\n"
-            "Use when Claude is stuck or you need to stop a long-running process."
+            "Use when Claude is stuck."
         )
 
     def _help_help(self) -> str:
-        """Get help for /help."""
+        """Get help for /help in HTML format."""
         return (
-            "/help - Displays available commands and help information\n\n"
-            "Usage: `/help` or `/help <command>`\n\n"
-            "Without arguments: Shows all available commands.\n"
-            "With argument: Shows detailed help for specific command.\n\n"
+            "<code>/help</code> - Displays available commands\n\n"
+            "Usage: <code>/help</code> or <code>/help \<command\></code>\n\n"
+            "Without arguments: Shows all commands.\n"
+            "With argument: Shows help for specific command.\n\n"
             "Examples:\n"
-            "  `/help` - Show all commands\n"
-            "  `/help new_session` - Show help for /new_session"
+            "  <code>/help</code> - Show all commands\n"
+            "  <code>/help new_session</code> - Show help for /new_session"
         )

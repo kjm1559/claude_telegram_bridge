@@ -4,6 +4,7 @@
 import subprocess
 import uuid
 import re
+import time
 import shlex
 import logging
 from pathlib import Path
@@ -232,7 +233,6 @@ class SessionManager:
         Returns:
             Tuple of (success, message).
         """
-        import time
         logger.info(f"[SESSION] send_keys called: session_id={session_id}, command='{command[:100]}'")
         try:
             # Check if session exists

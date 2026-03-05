@@ -90,10 +90,24 @@ class SessionManager:
             if result.returncode != 0:
                 return False, f"Failed to create tmux session: {result.stderr}"
 
-            # Launch Claude in the session
+            # Launch Claude in the session - send command and Enter separately
             claude_cmd = f"{CLAUDE_BINARY} --session-id {session_id}"
+
+            # Send the command
             result = subprocess.run(
-                ["tmux", "send-keys", "-t", session_id, claude_cmd, "C-m"],
+                ["tmux", "send-keys", "-t", session_id, claude_cmd],
+                capture_output=True,
+                text=True
+            )
+            if result.returncode != 0:
+                subprocess.run(["tmux", "kill-session", "-t", session_id], capture_output=True)
+                return False, f"Failed to send Claude command: {result.stderr}"
+
+            time.sleep(0.2)
+
+            # Send Enter key separately
+            result = subprocess.run(
+                ["tmux", "send-keys", "-t", session_id, "Enter"],
                 capture_output=True,
                 text=True
             )
@@ -103,12 +117,24 @@ class SessionManager:
                 subprocess.run(["tmux", "kill-session", "-t", session_id], capture_output=True)
                 return False, f"Failed to start Claude: {result.stderr}"
 
-            # Wait for Claude to display safety check prompt
-            time.sleep(0.5)
+            # Wait for Claude to display and process
+            time.sleep(2)
 
-            # Send "1" to confirm "Yes, I trust this folder"
+            # Send "1" to confirm safety check - send separately
             result = subprocess.run(
-                ["tmux", "send-keys", "-t", session_id, "1", "C-m"],
+                ["tmux", "send-keys", "-t", session_id, "1"],
+                capture_output=True,
+                text=True
+            )
+            if result.returncode != 0:
+                subprocess.run(["tmux", "kill-session", "-t", session_id], capture_output=True)
+                return False, f"Failed to send safety confirmation: {result.stderr}"
+
+            time.sleep(0.2)
+
+            # Send Enter for safety confirmation
+            result = subprocess.run(
+                ["tmux", "send-keys", "-t", session_id, "Enter"],
                 capture_output=True,
                 text=True
             )
@@ -251,16 +277,14 @@ class SessionManager:
                 logger.error(f"[SESSION] Session {session_id} is not active")
                 return False, f"Session {session_id} is not active"
 
-            # Send command with Enter key (C-m = Control+m = Enter)
+            # Send command and Enter (C-m) in a single tmux call
             logger.info(f"[SESSION] Sending to tmux: session={session_id}, command='{command}'")
+
             result = subprocess.run(
                 ["tmux", "send-keys", "-t", session_id, command, "C-m"],
                 capture_output=True,
                 text=True
             )
-
-            # Small delay to ensure tmux processes the input
-            time.sleep(0.1)
 
             if result.returncode != 0:
                 logger.error(f"[SESSION] Failed to send command: {result.stderr}")

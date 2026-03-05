@@ -91,10 +91,9 @@ class SessionManager:
                 return False, f"Failed to create tmux session: {result.stderr}"
 
             # Launch Claude in the session
-            # Using -l flag to send literal string without key name lookup
             claude_cmd = f"{CLAUDE_BINARY} --session-id {session_id}"
             result = subprocess.run(
-                ["tmux", "send-keys", "-l", "-t", session_id, claude_cmd, "C-m"],
+                ["tmux", "send-keys", "-t", session_id, claude_cmd, "C-m"],
                 capture_output=True,
                 text=True
             )
@@ -103,6 +102,21 @@ class SessionManager:
                 # Clean up tmux session on failure
                 subprocess.run(["tmux", "kill-session", "-t", session_id], capture_output=True)
                 return False, f"Failed to start Claude: {result.stderr}"
+
+            # Wait for Claude to display safety check prompt
+            time.sleep(0.5)
+
+            # Send "1" to confirm "Yes, I trust this folder"
+            result = subprocess.run(
+                ["tmux", "send-keys", "-t", session_id, "1", "C-m"],
+                capture_output=True,
+                text=True
+            )
+
+            if result.returncode != 0:
+                # Clean up tmux session on failure
+                subprocess.run(["tmux", "kill-session", "-t", session_id], capture_output=True)
+                return False, f"Failed to confirm safety check: {result.stderr}"
 
             # Store session in database
             self.db.create_session(session_id, cwd)
@@ -238,10 +252,9 @@ class SessionManager:
                 return False, f"Session {session_id} is not active"
 
             # Send command with Enter key (C-m = Control+m = Enter)
-            # Use -l flag to send literal string without key name lookup
             logger.info(f"[SESSION] Sending to tmux: session={session_id}, command='{command}'")
             result = subprocess.run(
-                ["tmux", "send-keys", "-l", "-t", session_id, command, "C-m"],
+                ["tmux", "send-keys", "-t", session_id, command, "C-m"],
                 capture_output=True,
                 text=True
             )
